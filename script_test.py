@@ -14,26 +14,16 @@ def import_player(number):
 
 
 def main():
-    tournament_information = {
-        "name": "1er tournoi",
-        "place": "Lyon",
-        "date_start": "2024-09-05",
-        "date_end": "2024-09-15",
-        "description": "Tournoi organisé par la fédération des echecs de Villeurbannes."
-    }
-    players = ["1", "3"]
-    list_players = []
-    for player in players:
-        data = import_player(player)
-        instance_of_player = Player(data["last_name"], data["first_name"], data["date_of_birth"], data["id"])
-        list_players.append(instance_of_player)
-    print(list_players)
 
-    tournament = Tournament(tournament_information, list_players)
-    print(repr(tournament))
-    print(tournament.current_score)
+    print(Player.get_all_players())
+    print(Player.filter_players(first_name="111"))
+    print(Player.filter_players(last_name="DupOnt", first_name="Océane"))
 
-    print(tournament.current_score["Dupont Jean"])
+    player_1 = Player(chess_id="aa00002")
+    print(player_1.software_id)
+    print(player_1.last_name)
+    print(player_1.first_name)
+    print(repr(player_1))
 
     # tournament = Tournament()
     # player_1 = Player()

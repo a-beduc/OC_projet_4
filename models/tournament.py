@@ -1,17 +1,22 @@
 
 class Tournament:
-    def __init__(self, information, list_of_players, round_numer=4):
-        self.name = information["name"]
-        self.place = information["place"]
-        self.date_start = information["date_start"]
-        self.date_end = information["date_end"]
+    def __init__(self, name, place, date_start, date_end, description="", round_numer=4):
+        self.name = name
+        self.place = place
+        self.date_start = date_start
+        self.date_end = date_end
         self.round_number = round_numer
         self.current_round = 0
-        self.list_of_players = list_of_players
-        self.description = information["description"]
+        self.description = description
+
+        self.tournament_participants = {}
 
         self.current_score = {}
         self.initialise_score()
+
+    def add_player(self, player):
+        if player not in self.tournament_participants:
+            pass
 
     def initialise_score(self):
         for player in self.list_of_players:
