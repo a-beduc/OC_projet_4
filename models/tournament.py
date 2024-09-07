@@ -11,19 +11,28 @@ class Tournament:
 
         self.tournament_participants = {}
 
-        self.current_score = {}
-        self.initialise_score()
+    def add_tournament_participant(self, player):
+        if player.software_id not in self.tournament_participants.keys():
+            self.tournament_participants[player.software_id] = (player, 0)
+        else:
+            print(f"Player : {repr(player)} is already registered")
 
-    def add_player(self, player):
-        if player not in self.tournament_participants:
-            pass
+    def remove_tournament_participant(self, player):
+        if player.software_id in self.tournament_participants.keys():
+            self.tournament_participants.pop(player.software_id)
+        else:
+            print(f"Player : {repr(player)} is not registered")
 
-    def initialise_score(self):
-        for player in self.list_of_players:
-            self.current_score[repr(player)] = 0
+    def modify_tournament_participant_score(self, player, score):
+        if player.software_id in self.tournament_participants.keys():
+            self.tournament_participants[player.software_id] = (player, score)
+        else:
+            print(f"Player : {repr(player)} is not registered")
 
     def __repr__(self):
-        players_repr = ', '.join([repr(player) for player in self.list_of_players])
+        players_repr = ', '.join([f"{player.last_name} {player.first_name}"
+                                  for player, _
+                                  in self.tournament_participants.values()])
         return (f"Information sur le tournoi :\n"
                 f"Nom du tournoi : '{self.name}'\n"
                 f"Lieu du tournoi : '{self.place}'\n"
@@ -34,8 +43,7 @@ class Tournament:
 
 
 def main():
-    tournament = Tournament()
-    print(tournament.round_number)
+    pass
 
 
 if __name__ == "__main__":
