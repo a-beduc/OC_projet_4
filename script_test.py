@@ -4,7 +4,6 @@ from models.player import Player
 from models.match import Match
 from models.round import Round
 import json
-import os
 
 
 def import_player(number):
@@ -14,30 +13,44 @@ def import_player(number):
 
 
 def main():
+    player_a = Player(software_id="1")
+    player_b = Player(software_id="2")
+    player_c = Player(software_id="3")
+    player_d = Player(software_id="4")
+    list_players = [player_a, player_b, player_c, player_d]
 
-    print(Player.get_all_players())
-    print(Player.filter_players(first_name="111"))
-    print(Player.filter_players(last_name="DupOnt", first_name="Océane"))
+    name = "Le grand tournoi"
+    place = "Lyon"
+    date_start = "18-09-2024"
+    date_end = "25-09-2024"
+    description = "grand tournoi organisé par la ville de Lyon"
 
-    player_1 = Player(chess_id="aa00002")
-    print(player_1.software_id)
-    print(player_1.last_name)
-    print(player_1.first_name)
-    print(repr(player_1))
+    tournament_a = Tournament(name, place, date_start, date_end, description)
+    for player in list_players:
+        tournament_a.add_tournament_participant(player)
+    round_a = Round("Round 1")
+    tournament_a.add_round(round_a)
+    match_a = Match(player_a, player_b)
+    match_b = Match(player_c, player_d)
+    round_a.add_match(match_a)
+    round_a.add_match(match_b)
 
-    # tournament = Tournament()
-    # player_1 = Player()
-    # player_2 = Player()
-    # match_1 = Match()
-    # match_2 = Match()
-    # round_1 = Round()
-    #
-    # print(tournament)
-    # print(player_1)
-    # print(player_2)
-    # print(match_1)
-    # print(match_2)
-    # print(round_1)
+    print("---------1---------")
+    print(repr(tournament_a))
+    print("--------2----------")
+    print(tournament_a.rounds)
+    print("--------3-----------")
+    print(tournament_a.tournament_participants)
+    print("---------4-----------")
+    print("---------5-----------")
+    print("----------6----------")
+    print(tournament_a.rounds[round_a.name].matches)
+    print("----------7----------")
+    tournament_a.rounds[round_a.name].matches[0].player_id_win(player_a.software_id)
+    print(tournament_a.rounds[round_a.name].matches)
+    print("-----------8---------")
+    tournament_a.rounds[round_a.name].matches[1].players_draw()
+    print(tournament_a.rounds[round_a.name].matches)
 
 
 if __name__ == '__main__':
