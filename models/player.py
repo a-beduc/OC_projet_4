@@ -43,7 +43,7 @@ class Player:
             self.chess_id = player_data[1]["chess_id"]
 
     def __repr__(self):
-        return f'{self.last_name} {self.first_name} : {self.chess_id}'
+        return f'software_id : {self.software_id}, {self.last_name} {self.first_name} : {self.chess_id}'
 
     @staticmethod
     def get_path():
