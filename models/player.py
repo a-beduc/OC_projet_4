@@ -9,7 +9,7 @@ class Player:
         If new_player is True, it initializes player with provided arguments otherwise
         If the provided criteria match exactly one player found in Database,
         it assigns the player's data to the instance. Otherwise, it raises an error.
-        :param software_id: Internal ID used in the database
+        :param software_id: Internal ID used in the database, it looks like : "p_number"
         :param last_name:
         :param first_name:
         :param date_of_birth: Must be written as YYYY-MM-DD
@@ -106,12 +106,13 @@ class Player:
     @classmethod
     def generate_new_software_id(cls):
         data = cls.get_all_players()
-        players_ids = [int(software_id) for software_id in data["players"].keys()]
+        players_ids = [int(software_id.split("_")[1]) for software_id in data["players"].keys()]
         if players_ids:
             new_id = max(players_ids) + 1
         else:
             new_id = 1
-        return str(new_id)
+
+        return f"p_{new_id}"
 
     def add_player_to_database(self):
 
@@ -133,9 +134,10 @@ class Player:
 
 def main():
     x = Player.get_all_players()
+    print(x)
     new_player = Player(first_name="Magnus",
                         date_of_birth="1990-11-30", chess_id="AA00010",
-                        new_player=False)
+                        new_player=True)
     print(repr(new_player))
 
 
