@@ -13,10 +13,10 @@ def import_player(number):
 
 
 def main():
-    player_a = Player(software_id="1")
-    player_b = Player(software_id="2")
-    player_c = Player(software_id="3")
-    player_d = Player(software_id="4")
+    player_a = Player(software_id="p_1")
+    player_b = Player(software_id="p_2")
+    player_c = Player(software_id="p_3")
+    player_d = Player(software_id="p_4")
     list_players = [player_a, player_b, player_c, player_d]
 
     name = "Le grand tournoi"
@@ -40,7 +40,7 @@ def main():
     print("--------2----------")
     print(tournament_a.rounds)
     print("--------3-----------")
-    print(tournament_a.tournament_participants)
+    print(tournament_a.participants)
     print("---------4-----------")
     print("---------5-----------")
     print("----------6----------")
