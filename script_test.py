@@ -13,10 +13,10 @@ def import_player(number):
 
 
 def main():
-    player_a = Player(software_id="p_1")
-    player_b = Player(software_id="p_2")
-    player_c = Player(software_id="p_3")
-    player_d = Player(software_id="p_4")
+    player_a = Player.from_json(software_id="p_1")
+    player_b = Player.from_json(software_id="p_2")
+    player_c = Player.from_json(software_id="p_3")
+    player_d = Player.from_json(software_id="p_4")
     list_players = [player_a, player_b, player_c, player_d]
 
     name = "Le grand tournoi"

@@ -3,56 +3,21 @@ import os
 
 
 class Player:
-    def __init__(self, software_id="", last_name="", first_name="", date_of_birth="", chess_id="", new_player=False):
+    def __init__(self, last_name, first_name, date_of_birth, chess_id, new_player=True):
         """
         Initialize a Player object.
-        If new_player is True, it initializes player with provided arguments otherwise
-        If the provided criteria match exactly one player found in Database,
-        it assigns the player's data to the instance. Otherwise, it raises an error.
-        :param software_id: Internal ID used in the database, it looks like : "p_number"
         :param last_name:
         :param first_name:
         :param date_of_birth: Must be written as YYYY-MM-DD
-        :param chess_id: International ID used by the federation
+        :param chess_id: International ID used by the chess federation "XX00000"
+        :param new_player: True by default, used to allow usage of add_player_to_database
         """
-
         self.new_player = new_player
-        if new_player:
-            self.software_id = self.generate_new_software_id()
-            self.last_name = last_name.capitalize()
-            self.first_name = first_name.capitalize()
-            self.date_of_birth = date_of_birth
-            self.chess_id = chess_id.upper()
-
-        else:
-            matching_player = self.filter_players(software_id=software_id,
-                                                  last_name=last_name,
-                                                  first_name=first_name,
-                                                  date_of_birth=date_of_birth,
-                                                  chess_id=chess_id)
-
-            # If no matching player is found, raise an error
-            if matching_player is None:
-                raise ValueError("No matching players found")
-
-            # If multiple players match the given criteria, display them and raise an error
-            elif len(matching_player) > 1:
-                print("Multiple matching players found")
-                for player in matching_player:
-                    print(
-                        f"ID : {player[0]}, "
-                        f"Name : {player[1]['first_name']} {player[1]['last_name']}, "
-                        f"Chess_ID : {player[1]['chess_id']}")
-                raise ValueError("Precise criteria of search to reduce number of results")
-
-            # If exactly one matching player is found, assign the player's data to the instance
-            else:
-                player_data = matching_player[0]
-                self.software_id = player_data[0]
-                self.last_name = player_data[1]["last_name"]
-                self.first_name = player_data[1]["first_name"]
-                self.date_of_birth = player_data[1]["date_of_birth"]
-                self.chess_id = player_data[1]["chess_id"]
+        self.software_id = self.generate_new_software_id()
+        self.last_name = last_name.capitalize()
+        self.first_name = first_name.capitalize()
+        self.date_of_birth = date_of_birth
+        self.chess_id = chess_id.upper()
 
     @staticmethod
     def get_path():
@@ -63,8 +28,8 @@ class Player:
     @classmethod
     def get_all_players(cls):
         """
-        Loads all players from the JSON file, it is a class method to access data without an instance of Player.
-        :return: A dictionary of dictionaries containing all players datas
+        Loads all players from a JSON file, it is a class method to access data without an instance of Player.
+        :return: A dictionary of dictionaries containing all players datas and use their software_id ("p_number") as key
         """
         with open(cls.get_path(), "r", encoding="utf-8") as data:
             data = json.load(data)
@@ -100,11 +65,63 @@ class Player:
         if matching_players:
             return matching_players
         else:
-            print("No players found with your criteria")
-            return None
+            raise ValueError("No players found with your criteria")
+
+    @classmethod
+    def from_json(cls, software_id="", last_name="", first_name="", date_of_birth="", chess_id=""):
+        """
+        Class method used to initialize a Player object from arguments to select a player from a JSON file and return a
+        player object.
+        :param software_id: "p_number"
+        :param last_name: "Dupont"
+        :param first_name: "Jean"
+        :param date_of_birth: YYYY-MM-DD
+        :param chess_id: AA00001
+        :return: Player object
+        """
+        matching_player = cls.filter_players(software_id=software_id,
+                                             last_name=last_name,
+                                             first_name=first_name,
+                                             date_of_birth=date_of_birth,
+                                             chess_id=chess_id)
+
+        # If no matching player is found, raise an error
+        if matching_player is None:
+            raise ValueError("No matching players found")
+
+        # If multiple players match the given criteria, display them and raise an error
+        elif len(matching_player) > 1:
+            print("Multiple matching players found")
+            for player in matching_player:
+                print(
+                    f"ID : {player[0]}, "
+                    f"Name : {player[1]['first_name']} {player[1]['last_name']}, "
+                    f"Chess_ID : {player[1]['chess_id']}")
+            raise ValueError("Precise criteria of search to reduce number of results")
+
+        # If exactly one matching player is found, assign the player's data to the instance of Player
+        else:
+            player_data = matching_player[0]
+            extracted_software_id = player_data[0]
+            extracted_last_name = player_data[1]["last_name"]
+            extracted_first_name = player_data[1]["first_name"]
+            extracted_date_of_birth = player_data[1]["date_of_birth"]
+            extracted_chess_id = player_data[1]["chess_id"]
+            player_instance = cls(extracted_last_name,
+                                  extracted_first_name,
+                                  extracted_date_of_birth,
+                                  extracted_chess_id,
+                                  new_player=False)
+            # Manually assign software_id
+            player_instance.software_id = extracted_software_id
+            return player_instance
 
     @classmethod
     def generate_new_software_id(cls):
+        """
+        Look into the database to create the next software_id: "p_number"
+        :return: "p_number"
+        """
         data = cls.get_all_players()
         players_ids = [int(software_id.split("_")[1]) for software_id in data["players"].keys()]
         if players_ids:
@@ -115,7 +132,10 @@ class Player:
         return f"p_{new_id}"
 
     def add_player_to_database(self):
-
+        """
+        Method to add a player to the database
+        :return: none
+        """
         if self.new_player:
             data = self.get_all_players()
             data["players"][self.software_id] = {}
@@ -125,6 +145,7 @@ class Player:
             data["players"][self.software_id]["chess_id"] = self.chess_id
             with open(self.get_path(), "w", encoding="utf-8") as file:
                 json.dump(data, file, indent=4)
+            self.new_player = False
         else:
             raise ValueError("Player is not a new player")
 
@@ -135,10 +156,12 @@ class Player:
 def main():
     x = Player.get_all_players()
     print(x)
-    new_player = Player(first_name="Magnus",
+    new_player = Player(first_name="Magnus", last_name="Carlsen",
                         date_of_birth="1990-11-30", chess_id="AA00010",
                         new_player=True)
     print(repr(new_player))
+    jean = Player.from_json(first_name="jean")
+    print(jean)
 
 
 if __name__ == '__main__':
