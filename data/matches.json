@@ -1,29 +1,29 @@
 {
-  "matches": {
-    "m_1": {
-      "p_1": 1,
-      "p_2": 0,
-      "complete" : true
-    },
-    "m_2": {
-      "p_3": 0.5,
-      "p_4": 0.5,
-      "complete" : true
-    },
-    "m_3": {
-      "p_1": 1,
-      "p_3": 0,
-      "complete" : true
-    },
-    "m_4": {
-      "p_2": 0.5,
-      "p_4": 0.5,
-      "complete" : true
-    },
-    "m_5": {
-      "p_1": 0,
-      "p_4": 0,
-      "complete" : false
+    "matches": {
+        "m_1": {
+            "p_1": 1,
+            "p_2": 0,
+            "complete": true
+        },
+        "m_2": {
+            "p_3": 0.5,
+            "p_4": 0.5,
+            "complete": true
+        },
+        "m_3": {
+            "p_1": 1,
+            "p_3": 0,
+            "complete": true
+        },
+        "m_4": {
+            "p_2": 0.5,
+            "p_4": 0.5,
+            "complete": true
+        },
+        "m_5": {
+          "p_1": 0,
+          "p_4": 0,
+          "complete": false
+        }
     }
-  }
 }
