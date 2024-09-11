@@ -1,69 +1,41 @@
-import os.path
-import json
+from models.base_model import _BaseModel
 
 
-class Match:
+class Match(_BaseModel):
     def __init__(self, player_1_software_id, player_2_software_id):
-
-        self.software_id = self.generate_new_software_id()
+        super().__init__()
         self.score = {
             player_1_software_id: 0,
             player_2_software_id: 0
         }
         self.is_finished = False
 
-    @staticmethod
-    def get_path():
-        base_path = os.path.dirname(__file__)
-        path = os.path.join(base_path, '..', 'data', 'matches.json')
-        return path
+    @classmethod
+    def get_filename(cls):
+        return "matches"
 
     @classmethod
-    def get_all_matches(cls):
-        with open(cls.get_path(), "r", encoding="utf-8") as file:
-            data = json.load(file)
-            return data
+    def _create_instance_from_json(cls, item_data, software_id):
+        is_finished = item_data['complete']
+        del item_data['complete']
+        match_data = list(item_data.items())
 
-    @classmethod
-    def from_json(cls, software_id):
-        data = cls.get_all_matches()
-        match_data = data["matches"][software_id]
-        is_finished = match_data["complete"]
-        del match_data["complete"]
-        match_data_item = list(match_data.items())
+        player_1_software_id, score_player_1 = match_data[0]
+        player_2_software_id, score_player_2 = match_data[1]
 
-        player_1_software_id, score_player_1 = match_data_item[0]
-        player_2_software_id, score_player_2 = match_data_item[1]
+        instance = cls(player_1_software_id=player_1_software_id,
+                       player_2_software_id=player_2_software_id)
+        instance.software_id = software_id
+        instance.score[player_1_software_id] = score_player_1
+        instance.score[player_2_software_id] = score_player_2
+        instance.is_finished = is_finished
 
-        match_instance = cls(player_1_software_id, player_2_software_id)
-        match_instance.software_id = software_id
-        match_instance.score[player_1_software_id] = score_player_1
-        match_instance.score[player_2_software_id] = score_player_2
-        match_instance.is_finished = is_finished
+        return instance
 
-        return match_instance
-
-    @classmethod
-    def generate_new_software_id(cls):
-        data = cls.get_all_matches()
-        matches_ids = [int(software_id.split("_")[1]) for software_id in data["matches"].keys()]
-        if matches_ids:
-            new_id = max(matches_ids) + 1
-        else:
-            new_id = 1
-
-        return f"m_{new_id}"
-
-    def save_match_to_database(self):
-        """
-        Method to add or update a match in the database
-        :return: none
-        """
-        data = self.get_all_matches()
-        data["matches"][self.software_id] = self.score
-        data["matches"][self.software_id]["complete"] = self.is_finished
-        with open(self.get_path(), "w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
+    def _prepare_data_to_save(self):
+        data = self.score
+        data["complete"] = self.is_finished
+        return data
 
     def player_id_win(self, player_software_id):
         if not self.is_finished:
@@ -110,15 +82,14 @@ class Match:
 
 
 def main():
-    match = Match.get_all_matches()
+    match = Match.get_data()
     print(match)
-    match_2 = match["matches"]
-    print(match_2)
+
     match_1 = Match("p_1", "p_2")
     print(repr(match_1))
     print(match_1.score)
     print(match_1.software_id)
-    match_1.save_match_to_database()
+    match_1.save_to_database()
     match_3 = Match.from_json("m_5")
     print(match_3.score)
     print(match_3.is_finished)

@@ -1,76 +1,42 @@
 from datetime import datetime
-import os.path
-import json
+from models.base_model import _BaseModel
 
 
-class Round:
+class Round(_BaseModel):
     def __init__(self, name):
-
-        self.software_id = self.generate_new_software_id()
+        super().__init__()
         self.name = name
-        self.time_start = datetime.now()
+        self.time_start = str(datetime.now())
         self.time_end = None
         self.is_finished = False
         self.matches = []
 
-    @staticmethod
-    def get_path():
-        base_path = os.path.dirname(__file__)
-        path = os.path.join(base_path, '..', 'data', 'rounds.json')
-        return path
-
     @classmethod
-    def get_all_rounds(cls):
-        with open(cls.get_path(), 'r', encoding="utf-8") as file:
-            data = json.load(file)
-            return data
+    def _create_instance_from_json(cls, item_data, software_id):
+        instance = cls(name=item_data["name"])
+        instance.software_id = software_id
+        instance.time_start = item_data["time_start"]
+        instance.time_end = item_data["time_end"]
+        instance.is_finished = item_data["complete"]
+        instance.matches = item_data["matches"]
+        return instance
 
-    @classmethod
-    def from_json(cls, software_id):
-        data = cls.get_all_rounds()
-        round_data = data["rounds"][software_id]
-
-        round_instance = cls(round_data["name"])
-        round_instance.software_id = software_id
-        round_instance.time_start = round_data["time_start"]
-        round_instance.time_end = round_data["time_end"]
-        round_instance.is_finished = round_data["complete"]
-        round_instance.matches = round_data["matches"]
-
-        return round_instance
-
-    @classmethod
-    def generate_new_software_id(cls):
-        data = cls.get_all_rounds()
-        rounds_ids = [int(software_id.split("_")[1]) for software_id in data["rounds"].keys()]
-        if rounds_ids:
-            new_id = max(rounds_ids) + 1
-        else:
-            new_id = 1
-
-        return f"r_{new_id}"
-
-    def save_round_to_database(self):
-        """
-        Method to add or update a round in the database
-        :return: none
-        """
-        data = self.get_all_rounds()
-        data["rounds"][self.software_id] = {}
-        data["rounds"][self.software_id]["name"] = self.name
-        data["rounds"][self.software_id]["time_start"] = self.time_start
-        data["rounds"][self.software_id]["time_end"] = self.time_end
-        data["rounds"][self.software_id]["complete"] = self.is_finished
-        data["rounds"][self.software_id]["matches"] = self.matches
-        with open(self.get_path(), 'w', encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
+    def _prepare_data_to_save(self):
+        data = {
+            "name": self.name,
+            "time_start": self.time_start,
+            "time_end": self.time_end,
+            "complete": self.is_finished,
+            "matches": self.is_finished
+        }
+        return data
 
     def add_match(self, match_software_id):
         self.matches.append(match_software_id)
 
     def end_round(self):
         if not self.is_finished:
-            self.time_end = datetime.now()
+            self.time_end = str(datetime.now())
             self.is_finished = True
         else:
             raise ValueError("Round is already finished")
@@ -80,7 +46,16 @@ class Round:
 
 
 def main():
-    pass
+    round_1 = Round("Round x")
+    # round_2 = Round.from_json("r_2")
+    print(round_1)
+    # print(round_2)
+    round_1.add_match("m_1")
+    round_1.add_match("m_2")
+    value = input("just to delay exec")
+    print(value)
+    round_1.end_round()
+    round_1.save_to_database()
 
 
 if __name__ == '__main__':
