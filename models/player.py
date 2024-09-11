@@ -8,6 +8,7 @@ class Player(_BaseModel):
         self.first_name = first_name.capitalize()
         self.date_of_birth = date_of_birth
         self.chess_id = chess_id.upper()
+        self.save_to_database()
 
     @classmethod
     def _create_instance_from_json(cls, item_data, software_id):

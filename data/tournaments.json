@@ -39,6 +39,26 @@
                 "round_3": "r_7",
                 "round_4": "r_8"
             }
+        },
+        "t_3": {
+            "name": "Tournament test",
+            "place": "Testland",
+            "date_start": "2020-12-04",
+            "date_end": "2020-12-05",
+            "description": "test of a description",
+            "participants": [],
+            "rounds_number": 8,
+            "rounds": {
+                "Round_0": "",
+                "Round_1": "",
+                "Round_2": "",
+                "Round_3": "",
+                "Round_4": "",
+                "Round_5": "",
+                "Round_6": "",
+                "Round_7": "",
+                "Round_8": ""
+            }
         }
     }
 }

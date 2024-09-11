@@ -9,6 +9,7 @@ class Match(_BaseModel):
             player_2_software_id: 0
         }
         self.is_finished = False
+        self.save_to_database()
 
     @classmethod
     def class_name_plural(cls):

@@ -10,6 +10,7 @@ class Round(_BaseModel):
         self.time_end = None
         self.is_finished = False
         self.matches = []
+        self.save_to_database()
 
     @classmethod
     def _create_instance_from_json(cls, item_data, software_id):
@@ -27,12 +28,15 @@ class Round(_BaseModel):
             "time_start": self.time_start,
             "time_end": self.time_end,
             "complete": self.is_finished,
-            "matches": self.is_finished
+            "matches": self.matches
         }
         return data
 
     def add_match(self, match_software_id):
-        self.matches.extend(match_software_id)
+        if type(match_software_id) is list:
+            self.matches.extend(match_software_id)
+        else:
+            self.matches.append(match_software_id)
 
     def end_round(self):
         if not self.is_finished:

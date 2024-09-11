@@ -42,12 +42,23 @@ def main():
                     player_b.software_id)
     match_2 = Match(player_c.software_id,
                     player_d.software_id)
-    round_1.add_match([match_1, match_2])
+    round_1.add_match([match_1.software_id, match_2.software_id])
+
+    round_1.add_match("m_16")
+    round_1.save_to_database()
     print(f"Round 1 : {repr(round_1)}")
     print(f"Match 1: {repr(match_1)}")
     print(f"Match 2: {repr(match_2)}")
 
     print("------------------")
+
+    tournament_1 = Tournament(name="Tournament test",
+                              place="Testland",
+                              date_start="2020-12-04",
+                              date_end="2020-12-05",
+                              description="test of a description",
+                              rounds_number=8)
+    print(tournament_1)
 
 
 

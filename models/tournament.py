@@ -11,7 +11,8 @@ class Tournament(_BaseModel):
         self.description = description
         self.participants = []
         self.rounds_number = rounds_number
-        self.rounds = {}
+        self.rounds = self.initialize_rounds()
+        self.save_to_database()
 
     @classmethod
     def _create_instance_from_json(cls, item_data, software_id):
@@ -38,6 +39,12 @@ class Tournament(_BaseModel):
             "rounds": self.rounds
         }
         return data
+
+    def initialize_rounds(self):
+        rounds = {}
+        for i in range(self.rounds_number + 1):
+            rounds[f"Round_{i}"] = ""
+        return rounds
 
     def add_tournament_participant(self, player_software_id):
         if player_software_id not in self.participants:
