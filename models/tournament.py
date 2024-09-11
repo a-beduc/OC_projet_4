@@ -1,121 +1,91 @@
-import os
-import json
+from models.base_model import _BaseModel
 
 
-class Tournament:
+class Tournament(_BaseModel):
     def __init__(self, name, place, date_start, date_end, description="", rounds_number=4):
-
-        self.software_id = self.generate_new_software_id()
+        super().__init__()
         self.name = name
         self.place = place
         self.date_start = date_start
         self.date_end = date_end
         self.description = description
-        self.rounds_number = rounds_number
-
-        self.rounds = {}
         self.participants = []
-
-    @staticmethod
-    def get_path():
-        base_path = os.path.dirname(__file__)
-        path = os.path.join(base_path, '..', 'data', 'tournaments.json')
-        return path
+        self.rounds_number = rounds_number
+        self.rounds = {}
 
     @classmethod
-    def get_all_tournaments(cls):
-        with open(cls.get_path(), 'r', encoding='utf-8') as file:
-            data = json.load(file)
-            return data
+    def _create_instance_from_json(cls, item_data, software_id):
+        instance = cls(name=item_data["name"],
+                       place=item_data["place"],
+                       date_start=item_data["date_start"],
+                       date_end=item_data["date_end"],
+                       description=item_data["description"],
+                       rounds_number=item_data["rounds_number"])
+        instance.software_id = software_id
+        instance.participants = item_data["participants"]
+        instance.rounds = item_data["rounds"]
+        return instance
 
-    @classmethod
-    def from_json(cls, software_id):
-        data = cls.get_all_tournaments()
-        tournament_data = data["tournaments"][software_id]
-        tournament_instance = cls(name=tournament_data["name"],
-                                  place=tournament_data["place"],
-                                  date_start=tournament_data["date_start"],
-                                  date_end=tournament_data["date_end"],
-                                  description=tournament_data["description"],
-                                  rounds_number=tournament_data["rounds_number"])
-        tournament_instance.software_id = software_id
-        tournament_instance.participants = tournament_data["participants"]
-        tournament_instance.rounds = tournament_data["rounds"]
-        return tournament_instance
-
-    @classmethod
-    def generate_new_software_id(cls):
-        data = cls.get_all_tournaments()
-        tournaments_ids = [int(software_id.split('_'))[1] for software_id in data["tournaments"].keys()]
-        if tournaments_ids:
-            new_id = max(tournaments_ids) + 1
-        else:
-            new_id = 1
-
-        return f"t_{new_id}"
-
-    def save_tournament_in_database(self):
-        """
-        Method to add or update a tournament in the database
-        :return: none
-        """
-        data = self.get_all_tournaments()
-        data["tournaments"][self.software_id] = {}
-        data["tournaments"][self.software_id]["name"] = self.name
-        data["tournaments"][self.software_id]["place"] = self.place
-        data["tournaments"][self.software_id]["date_start"] = self.date_start
-        data["tournaments"][self.software_id]["date_end"] = self.date_end
-        data["tournaments"][self.software_id]["description"] = self.description
-        data["tournaments"][self.software_id]["participants"] = self.participants
-        data["tournaments"][self.software_id]["rounds_number"] = self.rounds_number
-        data["tournaments"][self.software_id]["rounds"] = self.rounds
-        with open(self.get_path(), 'w', encoding='utf-8') as file:
-            json.dump(data, file, indent=4)
+    def _prepare_data_to_save(self):
+        data = {
+            "name": self.name,
+            "place": self.place,
+            "date_start": self.date_start,
+            "date_end": self.date_end,
+            "description": self.description,
+            "participants": self.participants,
+            "rounds_number": self.rounds_number,
+            "rounds": self.rounds
+        }
+        return data
 
     def add_tournament_participant(self, player_software_id):
         if player_software_id not in self.participants:
-            self.participants[player.software_id] = (player, 0)
+            self.participants[player_software_id] = (player_software_id, 0)
         else:
-            print(f"Player : {repr(player)} is already registered")
+            print(f"Player : {repr(player_software_id)} is already registered")
 
-    def remove_tournament_participant(self, player):
-        if player.software_id in self.participants.keys():
-            self.participants.pop(player.software_id)
+    def remove_tournament_participant(self, player_software_id):
+        if player_software_id in self.participants:
+            self.participants.pop(player_software_id)
         else:
-            print(f"Player : {repr(player)} is not registered")
+            print(f"Player with ID:{player_software_id} is not registered \n"
+                  f"check list of participants ID: {self.participants}")
 
-    def modify_tournament_participant_score(self, player, score):
-        """
-        Method to manually modify the score of a participant if there has been a mistake when result was added
-        :param player: Player
-        :param score: new score
-        """
-        if player.software_id in self.participants.keys():
-            self.participants[player.software_id] = (player, score)
+    def update_round(self, round_key, round_software_id):
+        if round_software_id not in self.rounds.values():
+            self.rounds[round_key] = round_software_id
         else:
-            print(f"Player : {repr(player)} is not registered")
-
-    def add_round(self, round_name):
-        if round_name not in self.rounds.keys():
-            self.rounds[round_name.name] = round_name
-        else:
-            raise ValueError(f"Round name {round_name} already registered")
+            raise ValueError(f"Round with ID {round_software_id} is already registered")
 
     def __repr__(self):
-        players_repr = ', '.join([f"{player.last_name} {player.first_name}"
-                                  for player, _
-                                  in self.participants.values()])
         return (f"Information sur le tournoi :\n"
                 f"Nom du tournoi : '{self.name}'\n"
                 f"Lieu du tournoi : '{self.place}'\n"
                 f"Début du tournoi : '{self.date_start}'\n"
                 f"Fin du tournoi : '{self.date_end}'\n"
                 f"Description du tournoi : '{self.description}'\n"
-                f"Liste des participants : {players_repr}")
+                f"Nombre de rounds : '{self.rounds_number}'\n"
+                f"Liste des participants : {self.participants}\n"
+                f"Liste des rounds : {self.rounds}\n")
 
 
 def main():
-    pass
+    tournament = Tournament.from_json("t_1")
+    print(tournament)
+    tournament_2 = Tournament(name="Tournoi de test",
+                              place="Test-land",
+                              date_start="2020-02-01",
+                              date_end="2020-02-02",
+                              description="Test description",
+                              rounds_number=4)
+    tournament_2.participants = ['p_1', 'p_3', 'p_4', 'p_5']
+    tournament_2.rounds = {'round_1': 'r_5',
+                           'round_2': 'r_6',
+                           'round_3': 'r_7',
+                           'round_4': 'r_8'
+                        }
+    tournament_2.save_to_database()
 
 
 if __name__ == "__main__":
