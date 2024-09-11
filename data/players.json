@@ -29,6 +29,30 @@
             "first_name": "Oc\u00e9ane",
             "date_of_birth": "1992-11-10",
             "chess_id": "AA00005"
+        },
+        "p_6": {
+            "last_name": "Nakamura",
+            "first_name": "Hikaru",
+            "date_of_birth": "1986-12-09",
+            "chess_id": "AA00008"
+        },
+        "p_7": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "date_of_birth": "1990-11-30",
+            "chess_id": "AA00001"
+        },
+        "p_8": {
+            "last_name": "Nepomniachtchi",
+            "first_name": "Ian",
+            "date_of_birth": "1990-07-14",
+            "chess_id": "AA00002"
+        },
+        "p_9": {
+            "last_name": "Ding",
+            "first_name": "Liren",
+            "date_of_birth": "1992-10-24",
+            "chess_id": "AA00003"
         }
     }
 }

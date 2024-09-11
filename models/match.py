@@ -11,7 +11,7 @@ class Match(_BaseModel):
         self.is_finished = False
 
     @classmethod
-    def get_filename(cls):
+    def class_name_plural(cls):
         return "matches"
 
     @classmethod

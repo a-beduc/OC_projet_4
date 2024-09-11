@@ -32,7 +32,7 @@ class Round(_BaseModel):
         return data
 
     def add_match(self, match_software_id):
-        self.matches.append(match_software_id)
+        self.matches.extend(match_software_id)
 
     def end_round(self):
         if not self.is_finished:
