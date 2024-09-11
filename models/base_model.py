@@ -9,18 +9,13 @@ class _BaseModel(ABC):
         self.software_id = self.generate_new_software_id()
 
     @classmethod
-    def get_filename(cls):
-        """
-        Method to dynamically handle the filename of the datas linked to the class, should work with inheritance
-        matches.json will need to be supercharged in child Match(BaseModel)
-        :return: classnames.json
-        """
+    def class_name_plural(cls):
         return f"{cls.__name__.lower()}s"
 
     @classmethod
     def get_path(cls):
         base_path = os.path.dirname(__file__)
-        return os.path.join(base_path, '..', 'data', f"{cls.get_filename()}.json")
+        return os.path.join(base_path, '..', 'data', f"{cls.class_name_plural()}.json")
 
     @classmethod
     def get_data(cls):
@@ -30,7 +25,7 @@ class _BaseModel(ABC):
     @classmethod
     def generate_new_software_id(cls):
         data = cls.get_data()
-        ids = [int(software_id.split("_")[1]) for software_id in data[cls.get_filename()].keys()]
+        ids = [int(software_id.split("_")[1]) for software_id in data[cls.class_name_plural()].keys()]
         if ids:
             new_id = max(ids) + 1
         else:
@@ -41,7 +36,7 @@ class _BaseModel(ABC):
     @classmethod
     def from_json(cls, software_id):
         data = cls.get_data()
-        item_data = data[cls.get_filename()][software_id]
+        item_data = data[cls.class_name_plural()][software_id]
         return cls._create_instance_from_json(item_data, software_id)
 
     @classmethod
@@ -51,7 +46,7 @@ class _BaseModel(ABC):
 
     def save_to_database(self):
         data = self.get_data()
-        data[self.get_filename()][self.software_id] = self._prepare_data_to_save()
+        data[self.class_name_plural()][self.software_id] = self._prepare_data_to_save()
         with open(self.get_path(), 'w', encoding='utf-8') as file:
             json.dump(data, file, indent=4)
 
