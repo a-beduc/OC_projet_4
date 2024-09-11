@@ -1,0 +1,38 @@
+{
+    "rounds": {
+        "r_1": {
+            "name": "Round 1",
+            "time_start": 0,
+            "time_end": 0,
+            "complete": true,
+            "matches": [
+                "m_1",
+                "m_2"
+            ]
+        },
+        "r_2": {
+            "name": "Round 2",
+            "time_start": 0,
+            "time_end": 0,
+            "complete": true,
+            "matches": [
+                "m_3",
+                "m_4"
+            ]
+        },
+        "r_3": {
+            "name": "Round 3",
+            "time_start": 0,
+            "time_end": 0,
+            "complete": false,
+            "matches": []
+        },
+        "r_4": {
+            "name": "Round 4",
+            "time_start": 0,
+            "time_end": 0,
+            "complete": false,
+            "matches": []
+        }
+    }
+}

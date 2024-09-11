@@ -1,34 +1,58 @@
 {
-  "players":{
-    "1": {
-      "last_name": "Dupont",
-      "first_name": "Jean",
-      "date_of_birth": "1990-05-14",
-      "chess_id": "AA00001"
-    },
-    "2": {
-      "last_name": "Martin",
-      "first_name": "Marie",
-      "date_of_birth": "1988-09-23",
-      "chess_id": "AA00002"
-    },
-    "3": {
-      "last_name": "Durand",
-      "first_name": "Paul",
-      "date_of_birth": "1992-11-10",
-      "chess_id": "AA00003"
-    },
-    "4": {
-      "last_name": "Bernard",
-      "first_name": "Lucie",
-      "date_of_birth": "1995-03-08",
-      "chess_id": "AA00004"
-    },
-    "5": {
-      "last_name": "Dupont",
-      "first_name": "Océane",
-      "date_of_birth": "1992-11-10",
-      "chess_id": "AA00005"
+    "players": {
+        "p_1": {
+            "last_name": "Dupont",
+            "first_name": "Jean",
+            "date_of_birth": "1990-05-14",
+            "chess_id": "AA00001"
+        },
+        "p_2": {
+            "last_name": "Martin",
+            "first_name": "Marie",
+            "date_of_birth": "1988-09-23",
+            "chess_id": "AA00002"
+        },
+        "p_3": {
+            "last_name": "Durand",
+            "first_name": "Paul",
+            "date_of_birth": "1992-11-10",
+            "chess_id": "AA00003"
+        },
+        "p_4": {
+            "last_name": "Bernard",
+            "first_name": "Lucie",
+            "date_of_birth": "1995-03-08",
+            "chess_id": "AA00004"
+        },
+        "p_5": {
+            "last_name": "Dupont",
+            "first_name": "Oc\u00e9ane",
+            "date_of_birth": "1992-11-10",
+            "chess_id": "AA00005"
+        },
+        "p_6": {
+            "last_name": "Nakamura",
+            "first_name": "Hikaru",
+            "date_of_birth": "1986-12-09",
+            "chess_id": "AA00008"
+        },
+        "p_7": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "date_of_birth": "1990-11-30",
+            "chess_id": "AA00001"
+        },
+        "p_8": {
+            "last_name": "Nepomniachtchi",
+            "first_name": "Ian",
+            "date_of_birth": "1990-07-14",
+            "chess_id": "AA00002"
+        },
+        "p_9": {
+            "last_name": "Ding",
+            "first_name": "Liren",
+            "date_of_birth": "1992-10-24",
+            "chess_id": "AA00003"
+        }
     }
-  }
 }
