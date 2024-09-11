@@ -1,8 +1,10 @@
 import os.path
 import json
+from abc import ABC, abstractmethod
+from typing import Dict
 
 
-class BaseModel:
+class _BaseModel(ABC):
     def __init__(self):
         self.software_id = self.generate_new_software_id()
 
@@ -13,12 +15,12 @@ class BaseModel:
         matches.json will need to be supercharged in child Match(BaseModel)
         :return: classnames.json
         """
-        return f"{cls.__name__.lower()}s.json"
+        return f"{cls.__name__.lower()}s"
 
     @classmethod
     def get_path(cls):
         base_path = os.path.dirname(__file__)
-        return os.path.join(base_path, '..', 'data', cls.get_filename())
+        return os.path.join(base_path, '..', 'data', f"{cls.get_filename()}.json")
 
     @classmethod
     def get_data(cls):
@@ -28,59 +30,40 @@ class BaseModel:
     @classmethod
     def generate_new_software_id(cls):
         data = cls.get_data()
-        ids = [int(software_id.split("_")[1]) for software_id in data[cls.__name__.lower()].keys()]
-
-        new_id = cls._check_list_for_missing_numbers(ids)
+        ids = [int(software_id.split("_")[1]) for software_id in data[cls.get_filename()].keys()]
+        if ids:
+            new_id = max(ids) + 1
+        else:
+            new_id = 1
         class_letter = cls.__name__[0].lower()
-
         return f"{class_letter}_{new_id}"
 
-    @staticmethod
-    def _check_list_for_missing_numbers(list_of_numbers):
-        """
-        Method to check a list of numbers and return a missing number in the sequence
-        examples :
-        [1, 3, 2, 6, 4] return 5
-        [0] return ValueError "There is a problem with ids found, one of them is lower than 1"
-        [] return 1
-        [2, 5] return 1
-        [1, 2, 3] return 4
-        :param list_of_numbers:
-        :return: number
-        """
-        list_of_numbers.sort()
-        if list_of_numbers:
-            if min(list_of_numbers) < 1:
-                raise ValueError("There is a problem with ids found, one of them is lower than 1")
-            elif min(list_of_numbers) > 1:
-                return 1
-            else:
-                for i in range(1, len(list_of_numbers)):
-                    if list_of_numbers[i] - list_of_numbers[i - 1] > 1:
-                        return list_of_numbers[i - 1] + 1
-                return list_of_numbers[-1] + 1
-        else:
-            return 1
+    @classmethod
+    def from_json(cls, software_id):
+        data = cls.get_data()
+        item_data = data[cls.get_filename()][software_id]
+        return cls._create_instance_from_json(item_data, software_id)
 
     @classmethod
-    def from_json(cls):
-        pass
-
-    @classmethod
-    def filter(cls):
-        pass
+    @abstractmethod
+    def _create_instance_from_json(cls, item_data, software_id):
+        raise NotImplementedError
 
     def save_to_database(self):
-        pass
+        data = self.get_data()
+        data[self.get_filename()][self.software_id] = self._prepare_data_to_save()
+        with open(self.get_path(), 'w', encoding='utf-8') as file:
+            json.dump(data, file, indent=4)
 
-    def remove_from_database(self):
-        pass
+    @abstractmethod
+    def _prepare_data_to_save(self) -> Dict[str, object]:
+        raise NotImplementedError
 
 
 def main():
-    pass
+    base = _BaseModel()
+    print(base)
 
 
 if __name__ == '__main__':
     main()
-
