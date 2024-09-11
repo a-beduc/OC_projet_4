@@ -3,54 +3,52 @@ from models.tournament import Tournament
 from models.player import Player
 from models.match import Match
 from models.round import Round
-import json
-
-
-def import_player(number):
-    with open("data/players.json", "r", encoding="utf-8") as data:
-        player = json.load(data)
-        return player["players"][number]
 
 
 def main():
-    player_a = Player.from_json(software_id="p_1")
-    player_b = Player.from_json(software_id="p_2")
-    player_c = Player.from_json(software_id="p_3")
-    player_d = Player.from_json(software_id="p_4")
+    # create a few Players
+    player_a = Player(last_name="Nakamura",
+                      first_name="Hikaru",
+                      date_of_birth="1986-12-09",
+                      chess_id="AA00008")
+
+    player_b = Player(last_name="Carlsen",
+                      first_name="Magnus",
+                      date_of_birth="1990-11-30",
+                      chess_id="AA00001")
+
+    player_c = Player(last_name="Nepomniachtchi",
+                      first_name="Ian",
+                      date_of_birth="1990-07-14",
+                      chess_id="AA00002")
+
+    player_d = Player(last_name="Ding",
+                      first_name="Liren",
+                      date_of_birth="1992-10-24",
+                      chess_id="AA00003")
+
     list_players = [player_a, player_b, player_c, player_d]
 
-    name = "Le grand tournoi"
-    place = "Lyon"
-    date_start = "18-09-2024"
-    date_end = "25-09-2024"
-    description = "grand tournoi organisé par la ville de Lyon"
-
-    tournament_a = Tournament(name, place, date_start, date_end, description)
+    print("------------------")
     for player in list_players:
-        tournament_a.add_tournament_participant(player)
-    round_a = Round("Round 1")
-    tournament_a.add_round(round_a)
-    match_a = Match(player_a, player_b)
-    match_b = Match(player_c, player_d)
-    round_a.add_match(match_a)
-    round_a.add_match(match_b)
+        print(repr(player))
+    print("------------------")
+    print("\n")
 
-    print("---------1---------")
-    print(repr(tournament_a))
-    print("--------2----------")
-    print(tournament_a.rounds)
-    print("--------3-----------")
-    print(tournament_a.participants)
-    print("---------4-----------")
-    print("---------5-----------")
-    print("----------6----------")
-    print(tournament_a.rounds[round_a.name].matches)
-    print("----------7----------")
-    tournament_a.rounds[round_a.name].matches[0].player_id_win(player_a.software_id)
-    print(tournament_a.rounds[round_a.name].matches)
-    print("-----------8---------")
-    tournament_a.rounds[round_a.name].matches[1].players_draw()
-    print(tournament_a.rounds[round_a.name].matches)
+    # create a round and add players
+
+    round_1 = Round("Round y")
+    match_1 = Match(player_a.software_id,
+                    player_b.software_id)
+    match_2 = Match(player_c.software_id,
+                    player_d.software_id)
+    round_1.add_match([match_1, match_2])
+    print(f"Round 1 : {repr(round_1)}")
+    print(f"Match 1: {repr(match_1)}")
+    print(f"Match 2: {repr(match_2)}")
+
+    print("------------------")
+
 
 
 if __name__ == '__main__':
