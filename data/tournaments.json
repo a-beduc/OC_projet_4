@@ -7,6 +7,7 @@
       "date_end": "2024-09-18",
       "description": "Le maire de la ville de Lyon a organisé ce tournoi au profit des sans-abris.",
       "participants": ["p_1", "p_2", "p_3", "p_4"],
+      "rounds_number": 4,
       "rounds" : {
         "round_1": "r_1",
         "round_2": "r_2",
