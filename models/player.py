@@ -3,16 +3,14 @@ import os.path
 
 
 class Player:
-    def __init__(self, last_name, first_name, date_of_birth, chess_id, new_player=True):
+    def __init__(self, last_name, first_name, date_of_birth, chess_id):
         """
         Initialize a Player object.
         :param last_name:
         :param first_name:
         :param date_of_birth: Must be written as YYYY-MM-DD
         :param chess_id: International ID used by the chess federation "XX00000"
-        :param new_player: True by default, used to allow usage of add_player_to_database
         """
-        self.new_player = new_player
         self.software_id = self.generate_new_software_id()
         self.last_name = last_name.capitalize()
         self.first_name = first_name.capitalize()
@@ -31,8 +29,8 @@ class Player:
         Loads all players from a JSON file, it is a class method to access data without an instance of Player.
         :return: A dictionary of dictionaries containing all players datas and use their software_id ("p_number") as key
         """
-        with open(cls.get_path(), "r", encoding="utf-8") as data:
-            data = json.load(data)
+        with open(cls.get_path(), "r", encoding="utf-8") as file:
+            data = json.load(file)
             return data
 
     @classmethod
@@ -110,8 +108,7 @@ class Player:
             player_instance = cls(extracted_last_name,
                                   extracted_first_name,
                                   extracted_date_of_birth,
-                                  extracted_chess_id,
-                                  new_player=False)
+                                  extracted_chess_id)
             # Manually assign software_id
             player_instance.software_id = extracted_software_id
             return player_instance
@@ -131,23 +128,22 @@ class Player:
 
         return f"p_{new_id}"
 
-    def add_player_to_database(self):
+    def save_player_to_database(self):
         """
-        Method to add a player to the database
+        Method to add or update a player in the database
         :return: none
         """
-        if self.new_player:
-            data = self.get_all_players()
-            data["players"][self.software_id] = {}
-            data["players"][self.software_id]["last_name"] = self.last_name
-            data["players"][self.software_id]["first_name"] = self.first_name
-            data["players"][self.software_id]["date_of_birth"] = self.date_of_birth
-            data["players"][self.software_id]["chess_id"] = self.chess_id
-            with open(self.get_path(), "w", encoding="utf-8") as file:
-                json.dump(data, file, indent=4)
-            self.new_player = False
-        else:
-            raise ValueError("Player is not a new player")
+        data = self.get_all_players()
+        data["players"][self.software_id] = {}
+        data["players"][self.software_id]["last_name"] = self.last_name
+        data["players"][self.software_id]["first_name"] = self.first_name
+        data["players"][self.software_id]["date_of_birth"] = self.date_of_birth
+        data["players"][self.software_id]["chess_id"] = self.chess_id
+        with open(self.get_path(), "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
+
+    def remove_player_from_database(self):
+        pass
 
     def __repr__(self):
         return f'software_id : {self.software_id}, {self.last_name} {self.first_name} : {self.chess_id}'
@@ -157,11 +153,13 @@ def main():
     x = Player.get_all_players()
     print(x)
     new_player = Player(first_name="Magnus", last_name="Carlsen",
-                        date_of_birth="1990-11-30", chess_id="AA00010",
-                        new_player=True)
+                        date_of_birth="1990-11-30", chess_id="AA00010")
     print(repr(new_player))
     jean = Player.from_json(first_name="jean")
     print(jean)
+
+    # could be used to create dynamic pathing with inheritance
+    print(Player.__name__.lower())
 
 
 if __name__ == '__main__':

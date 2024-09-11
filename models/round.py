@@ -4,10 +4,9 @@ import json
 
 
 class Round:
-    def __init__(self, name, new_round=True):
+    def __init__(self, name):
 
         self.software_id = self.generate_new_software_id()
-        self.new_round = new_round
         self.name = name
         self.time_start = datetime.now()
         self.time_end = None
@@ -22,8 +21,8 @@ class Round:
 
     @classmethod
     def get_all_rounds(cls):
-        with open(cls.get_path(), 'r', encoding="utf-8") as data:
-            data = json.load(data)
+        with open(cls.get_path(), 'r', encoding="utf-8") as file:
+            data = json.load(file)
             return data
 
     @classmethod
@@ -31,7 +30,7 @@ class Round:
         data = cls.get_all_rounds()
         round_data = data["rounds"][software_id]
 
-        round_instance = cls(round_data["name"], new_round=False)
+        round_instance = cls(round_data["name"])
         round_instance.software_id = software_id
         round_instance.time_start = round_data["time_start"]
         round_instance.time_end = round_data["time_end"]
@@ -51,19 +50,20 @@ class Round:
 
         return f"r_{new_id}"
 
-    def add_round_to_database(self):
-        if self.new_round:
-            data = self.get_all_rounds()
-            data["rounds"][self.software_id] = {}
-            data["rounds"][self.software_id]["name"] = self.name
-            data["rounds"][self.software_id]["time_start"] = self.time_start
-            data["rounds"][self.software_id]["time_end"] = self.time_end
-            data["rounds"][self.software_id]["complete"] = self.is_finished
-            data["rounds"][self.software_id]["matches"] = self.matches
-            with open(self.get_path(), 'w', encoding="utf-8") as file:
-                json.dump(data, file, indent=4)
-        else:
-            raise ValueError("Round is already logged")
+    def save_round_to_database(self):
+        """
+        Method to add or update a round in the database
+        :return: none
+        """
+        data = self.get_all_rounds()
+        data["rounds"][self.software_id] = {}
+        data["rounds"][self.software_id]["name"] = self.name
+        data["rounds"][self.software_id]["time_start"] = self.time_start
+        data["rounds"][self.software_id]["time_end"] = self.time_end
+        data["rounds"][self.software_id]["complete"] = self.is_finished
+        data["rounds"][self.software_id]["matches"] = self.matches
+        with open(self.get_path(), 'w', encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
 
     def add_match(self, match_software_id):
         self.matches.append(match_software_id)

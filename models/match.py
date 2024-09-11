@@ -3,9 +3,8 @@ import json
 
 
 class Match:
-    def __init__(self, player_1_software_id, player_2_software_id, new_match=True):
+    def __init__(self, player_1_software_id, player_2_software_id):
 
-        self.new_match = new_match
         self.software_id = self.generate_new_software_id()
         self.score = {
             player_1_software_id: 0,
@@ -21,8 +20,8 @@ class Match:
 
     @classmethod
     def get_all_matches(cls):
-        with open(cls.get_path(), "r", encoding="utf-8") as data:
-            data = json.load(data)
+        with open(cls.get_path(), "r", encoding="utf-8") as file:
+            data = json.load(file)
             return data
 
     @classmethod
@@ -36,7 +35,7 @@ class Match:
         player_1_software_id, score_player_1 = match_data_item[0]
         player_2_software_id, score_player_2 = match_data_item[1]
 
-        match_instance = cls(player_1_software_id, player_2_software_id, new_match=False)
+        match_instance = cls(player_1_software_id, player_2_software_id)
         match_instance.software_id = software_id
         match_instance.score[player_1_software_id] = score_player_1
         match_instance.score[player_2_software_id] = score_player_2
@@ -55,15 +54,16 @@ class Match:
 
         return f"m_{new_id}"
 
-    def add_match_to_database(self):
-        if self.new_match:
-            data = self.get_all_matches()
-            data["matches"][self.software_id] = self.score
-            data["matches"][self.software_id]["complete"] = self.is_finished
-            with open(self.get_path(), "w", encoding="utf-8") as file:
-                json.dump(data, file, indent=4)
-        else:
-            raise ValueError("The match is already logged")
+    def save_match_to_database(self):
+        """
+        Method to add or update a match in the database
+        :return: none
+        """
+        data = self.get_all_matches()
+        data["matches"][self.software_id] = self.score
+        data["matches"][self.software_id]["complete"] = self.is_finished
+        with open(self.get_path(), "w", encoding="utf-8") as file:
+            json.dump(data, file, indent=4)
 
     def player_id_win(self, player_software_id):
         if not self.is_finished:
@@ -118,7 +118,7 @@ def main():
     print(repr(match_1))
     print(match_1.score)
     print(match_1.software_id)
-    match_1.add_match_to_database()
+    match_1.save_match_to_database()
     match_3 = Match.from_json("m_5")
     print(match_3.score)
     print(match_3.is_finished)
