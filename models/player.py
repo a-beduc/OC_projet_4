@@ -1,5 +1,5 @@
 from models.base_model import _BaseModel
-from typing import Dict, Tuple
+from typing import Dict
 
 
 class Player(_BaseModel):
@@ -21,11 +21,11 @@ class Player(_BaseModel):
             self.save_to_database()
 
     @classmethod
-    def _create_instance_from_json(cls, item_data: Dict[str, str], software_id: str, save_to_db: bool = False):
+    def _create_instance_from_json(cls, item_data: Dict[str, str], player_id: str, save_to_db: bool = False):
         """
         Create a player object from a json dictionary.
         :param item_data:
-        :param software_id:
+        :param player_id:
         :param save_to_db: must be false to avoid copy of player instance in database
         :return: An instance of Player
         """
@@ -36,7 +36,7 @@ class Player(_BaseModel):
             chess_id=item_data["chess_id"],
             save_to_db=False
         )
-        instance.software_id = software_id
+        instance.software_id = player_id
         return instance
 
     def _prepare_data_to_save(self) -> Dict[str, str]:
