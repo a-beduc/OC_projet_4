@@ -51,7 +51,7 @@ class Player(_BaseModel):
             "chess_id": self.chess_id}
         return data
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'software_id : {self.software_id}, {self.last_name} {self.first_name} : {self.chess_id}'
 
     # Supplementary methods that may be used when views will be implemented to help users to find players without
