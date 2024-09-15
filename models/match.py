@@ -3,7 +3,10 @@ from typing import Dict
 
 
 class Match(_BaseModel):
-    def __init__(self, player_1_software_id, player_2_software_id, save_to_db=True):
+    def __init__(self,
+                 player_1_software_id: str,
+                 player_2_software_id: str,
+                 save_to_db=True):
         """
         Initialize a new match instance
         before initialization, players are sorted with their id numbers to allows coherence in database.
@@ -32,9 +35,9 @@ class Match(_BaseModel):
     def _create_instance_from_json(cls, item_data: Dict[str, object], match_id: str, save_to_db: bool = False):
         """
         Create a match object from a json dictionary.
-        :param item_data:
+        :param item_data: The dictionary extracted from the tournament.json
         :param match_id:
-        :param save_to_db: must be false to avoid copy of player instance in database
+        :param save_to_db: must be false to avoid copy of match instance in database
         :return: An instance of Match
         """
         is_finished = item_data['complete']
@@ -59,7 +62,7 @@ class Match(_BaseModel):
         Prepare data to save in the database.
         :return: dictionary with data to save in the database
         """
-        data = self.score
+        data = self.score.copy()
         data["complete"] = self.is_finished
         return data
 

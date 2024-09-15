@@ -29,6 +29,12 @@
             "first_name": "Oc\u00e9ane",
             "date_of_birth": "1992-11-10",
             "chess_id": "AA00005"
+        },
+        "p_6": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "date_of_birth": "1990-11-30",
+            "chess_id": "AA00010"
         }
     }
 }
