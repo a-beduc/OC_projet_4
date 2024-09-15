@@ -1,75 +1,32 @@
 {
     "tournaments": {
         "t_1": {
-            "name": "Tournoi de test",
-            "place": "Test-land",
-            "date_start": "2020-02-01",
-            "date_end": "2020-02-02",
-            "description": "Test description",
+            "name": "Tournament test",
+            "place": "Testland",
+            "date_start": "2020-12-04",
+            "date_end": "2020-12-05",
+            "description": "test of a description",
             "participants": {
-                "p_1": 0,
-                "p_3": 0,
-                "p_4": 0,
-                "p_5": 0
+                "p_1": 4,
+                "p_2": 3,
+                "p_3": 2,
+                "p_4": 2,
+                "p_5": 1,
+                "p_6": 0
             },
             "rounds_number": 4,
             "rounds": {
-                "Round_1": null,
-                "Round_2": null,
-                "Round_3": null,
-                "Round_4": null
-            },
-            "first_pairing": null
-        },
-        "t_2": {
-            "name": "Tournoi de test",
-            "place": "Test-land",
-            "date_start": "2020-02-01",
-            "date_end": "2020-02-02",
-            "description": "Test description",
-            "participants": {
-                "p_1": 0,
-                "p_3": 0,
-                "p_4": 0,
-                "p_5": 0
-            },
-            "rounds_number": 4,
-            "rounds": {
-                "Round_1": "r_10",
-                "Round_2": null,
-                "Round_3": null,
-                "Round_4": null
+                "Round_1": "r_1",
+                "Round_2": "r_2",
+                "Round_3": "r_3",
+                "Round_4": "r_4"
             },
             "first_pairing": [
-                "p_3",
-                "p_1",
-                "p_4",
-                "p_5"
-            ]
-        },
-        "t_3": {
-            "name": "Tournoi de test",
-            "place": "Test-land",
-            "date_start": "2020-02-01",
-            "date_end": "2020-02-02",
-            "description": "Test description",
-            "participants": {
-                "p_1": 1,
-                "p_3": 0,
-                "p_4": 0.5,
-                "p_5": 0.5
-            },
-            "rounds_number": 4,
-            "rounds": {
-                "Round_1": "r_11",
-                "Round_2": null,
-                "Round_3": null,
-                "Round_4": null
-            },
-            "first_pairing": [
-                "p_1",
+                "p_2",
                 "p_4",
                 "p_5",
+                "p_1",
+                "p_6",
                 "p_3"
             ]
         }
