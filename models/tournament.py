@@ -2,10 +2,18 @@ from models.base_model import _BaseModel
 from models.round import Round
 from models.pairing import Pairing
 from models.player import Player
+from typing import Dict
 
 
 class Tournament(_BaseModel):
-    def __init__(self, name, place, date_start, date_end, description="", rounds_number=4, save_to_db=True):
+    def __init__(self,
+                 name: str,
+                 place: str,
+                 date_start: str,
+                 date_end: str,
+                 description: str = "",
+                 rounds_number: int = 4,
+                 save_to_db: bool = True):
         """
         Initialize a new Tournament instance
         :param name:
@@ -13,7 +21,7 @@ class Tournament(_BaseModel):
         :param date_start: YYYY-MM-DD
         :param date_end: YYYY-MM-DD
         :param description:
-        :param rounds_number: rounds_number should be not greater than <number_of_players - 1>
+        :param rounds_number: rounds_number should not be greater than <number_of_players - 1>
         :param save_to_db: if true, save the instance in the database
         """
         super().__init__()
@@ -30,8 +38,37 @@ class Tournament(_BaseModel):
         if save_to_db:
             self.save_to_database()
 
+    def instantanciate_players(self, dict_participants: Dict[str, float]):
+        """
+        Dictionary comphrension to instanciate Players from their corresponding ID
+        :param dict_participants:
+        {
+                "p_1": 4,
+                "p_2": 3,
+        }
+        :return: {
+                "p_1": (<Obj.player>, 4),
+                "p_2": (<Obj.player>, 3),
+            }
+        """
+        return {participant_id: (Player.from_json(participant_id), score)
+                for participant_id, score in dict_participants.items()
+                }
+
     @classmethod
-    def _create_instance_from_json(cls, item_data, tournament_id, save_to_db=False):
+    def _create_instance_from_json(cls,
+                                   item_data: dict[str, object],
+                                   tournament_id: str,
+                                   save_to_db: bool = False):
+        """
+        Create a tournament object from a json dictionary
+        Instantiate Players from their corresponding id found in the database
+        Instantiate Rounds from their corresponding id found in the database
+        Instantiate Pairing from the "first_pairing" found in database and Rounds founds in self.rounds
+        :param item_data: The dictionary extracted from the tournament.json
+        :param tournament_id:
+        :param save_to_db: must be false to avoid copy of tournament instance in database
+        """
         instance = cls(name=item_data["name"],
                        place=item_data["place"],
                        date_start=item_data["date_start"],
@@ -42,10 +79,10 @@ class Tournament(_BaseModel):
         instance.software_id = tournament_id
         instance._first_pairing_memory = item_data["first_pairing"]
 
-        instance.participants = {participant_id: (Player.from_json(participant_id), score)
-                                 for participant_id, score in item_data["participants"].items()
-        }
+        # dict comprehension to create instances of Players and score
+        instance.participants = instance.instantanciate_players(item_data["participants"])
 
+        # if value stored in "Round_x": value isn't null, then it will instantiate the Round with the corresponding ID
         round_exist = False
         instance.rounds = {}
         round_name_list = []
@@ -58,6 +95,7 @@ class Tournament(_BaseModel):
                 instance.rounds[round_name] = None
         sorted(round_name_list)
 
+        # if at least, one round has already been created, then instantiate the corresponding Pairing
         if round_exist:
             list_played_matches = []
             for round in instance.rounds.values():
@@ -76,10 +114,17 @@ class Tournament(_BaseModel):
         return instance
 
     def _prepare_data_to_save(self):
+        """
+        Prepare data to save in the database.
+        :return: dictionary with data to save in the database
+        """
+        # Get rid of instances of players when storing datas
         data_participants = {}
         for participant_id, participant in self.participants.items():
             data_participants[participant_id] = participant[1]
         data_rounds = {}
+
+        # Get rid of instances of rounds when storing datas
         for round_name, round_id in self.rounds.items():
             if round_id:
                 data_rounds[round_name] = round_id.software_id
@@ -94,17 +139,27 @@ class Tournament(_BaseModel):
             "participants": data_participants,
             "rounds_number": self.rounds_number,
             "rounds": data_rounds,
+
+            # Keep a memory of the first round pairing to allow instantiation of the same circle configuration when
+            # reloading
             "first_pairing": self._first_pairing_memory
         }
         return data
 
-    def initialize_rounds_dict(self):
+    def initialize_rounds_dict(self) -> Dict[str, None]:
+        """
+        Initialize the rounds dictionary with keys 'Round_1', 'Round_2'
+        :return: a dictionary
+        """
         rounds = {}
         for i in range(self.rounds_number):
             rounds[f"Round_{i+1}"] = None
         return rounds
 
-    def add_participant(self, player_id):
+    def add_participant(self, player_id: str):
+        """
+        Add a participant to the tournament and set his/her score to 0
+        """
         if player_id not in self.participants.keys():
             self.participants[player_id] = (Player.from_json(player_id), 0)
             self.save_to_database()
@@ -112,14 +167,22 @@ class Tournament(_BaseModel):
             print(f"Player : {repr(player_software_id)} is already registered")
 
     def initialize_first_round(self):
+        """
+        Initialize the first round of the tournament by generating pairings and creating rounds and matches.
+        """
         self.pairing = Pairing(sorted(self.participants.keys()))
+        # save the first configuration to allow recreation a the same configuration circle in Pairing.
         self._first_pairing_memory = self.pairing.initial_configuration
         self.pairing.generate_circle_configurations()
         match_pairs = self.pairing.generate_first_round_configuration()
         self.rounds["Round_1"] = Round(f"Round_1", match_pairs)
         self.save_to_database()
 
-    def end_round(self, round_key):
+    def end_round(self, round_key: str):
+        """
+        End a round and update participants' scores.
+        :param round_key: ex : 'Round_1'; it can also be called with method self.check_current_round()
+        """
         current_round = self.check_current_round()
         if round_key == current_round and self.rounds[round_key] != None:
             self.rounds[round_key].end_round()
@@ -129,6 +192,10 @@ class Tournament(_BaseModel):
             self.save_to_database()
 
     def check_current_round(self):
+        """
+        Check and return the current round of the tournament.
+        :return: ex : 'Round_2'
+        """
         list_of_round = []
         for key, round in self.rounds.items():
             if round:
@@ -143,11 +210,11 @@ class Tournament(_BaseModel):
 
     def start_next_round(self):
         """
-        to do
-        need to take current ranking into account, need to dynamically understand what round was the last
-        maybe i will need to change self.rounds to add a boolean that indicate if the round is finished or not and
-        store it in the DB.
-        :return:
+        Start the next round of the tournament by generating pairings based on the current ranking.
+        From a dictionary where key=rank from 1 to n and value=[list_of_players_id] and the past matches it will
+        create the next matches to satisfy two conditions:
+            1 - Try to match the players with the highest scores on against the others.
+            2 - Avoid the repetition of a past match.
         """
         current_round = self.check_current_round()
         if self.rounds[current_round] is not None:
@@ -160,6 +227,10 @@ class Tournament(_BaseModel):
         self.save_to_database()
 
     def get_ranking(self):
+        """
+        Compute and return the current ranking of participants.
+        :return: a dictionary where key=rank from 1 to n and value=[list_of_players_id]
+        """
         scores = [score for player, score in self.participants.values()]
         sorted_scores = sorted(set(scores), reverse=True)
         score_to_rank = {score: str(rank + 1) for rank, score in enumerate(sorted_scores)}

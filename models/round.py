@@ -9,7 +9,10 @@ class Round(_BaseModel):
     2024/09/14 : It appears that Round or round is a name used for a built-in function, the name of the class might need
     to be changed
     """
-    def __init__(self, name: str, matches_pairs: Optional[Set[Tuple[str, str]]] = None, save_to_db: bool = True):
+    def __init__(self,
+                 name: str,
+                 matches_pairs: Optional[Set[Tuple[str, str]]] = None,
+                 save_to_db: bool = True):
         """
         Initialise a new instance of a Round
 
@@ -32,12 +35,16 @@ class Round(_BaseModel):
             self.save_to_database()
 
     @classmethod
-    def _create_instance_from_json(cls, item_data: dict[str, object], round_id: str, save_to_db: bool = False):
+    def _create_instance_from_json(cls,
+                                   item_data: dict[str, object],
+                                   round_id: str,
+                                   save_to_db: bool = False):
         """
         Create a round object from a json dictionary.
+        Instantiate matches from their corresponding id found in the database
         :param item_data:
         :param round_id:
-        :param save_to_db: must be false to avoid copy of player instance in database
+        :param save_to_db: must be false to avoid copy of round instance in database
         :return: An instance of Player
         """
         instance = cls(name=item_data["name"],

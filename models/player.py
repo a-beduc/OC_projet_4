@@ -3,7 +3,12 @@ from typing import Dict
 
 
 class Player(_BaseModel):
-    def __init__(self, last_name: str, first_name: str, date_of_birth: str, chess_id: str, save_to_db: bool = True):
+    def __init__(self,
+                 last_name: str,
+                 first_name: str,
+                 date_of_birth: str,
+                 chess_id: str,
+                 save_to_db: bool = True):
         """
         Initialize a new player object.
         :param last_name:
@@ -24,7 +29,7 @@ class Player(_BaseModel):
     def _create_instance_from_json(cls, item_data: Dict[str, str], player_id: str, save_to_db: bool = False):
         """
         Create a player object from a json dictionary.
-        :param item_data:
+        :param item_data: The dictionary extracted from the tournament.json
         :param player_id:
         :param save_to_db: must be false to avoid copy of player instance in database
         :return: An instance of Player
