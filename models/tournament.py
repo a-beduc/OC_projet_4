@@ -6,6 +6,16 @@ from models.player import Player
 
 class Tournament(_BaseModel):
     def __init__(self, name, place, date_start, date_end, description="", rounds_number=4, save_to_db=True):
+        """
+        Initialize a new Tournament instance
+        :param name:
+        :param place:
+        :param date_start: YYYY-MM-DD
+        :param date_end: YYYY-MM-DD
+        :param description:
+        :param rounds_number: rounds_number should be not greater than <number_of_players - 1>
+        :param save_to_db: if true, save the instance in the database
+        """
         super().__init__()
         self.name = name
         self.place = place
@@ -29,7 +39,7 @@ class Tournament(_BaseModel):
                        description=item_data["description"],
                        rounds_number=item_data["rounds_number"],
                        save_to_db=False)
-        instance.tournament_id = software_id
+        instance.software_id = tournament_id
         instance._first_pairing_memory = item_data["first_pairing"]
 
         instance.participants = {participant_id: (Player.from_json(participant_id), score)
@@ -38,12 +48,15 @@ class Tournament(_BaseModel):
 
         round_exist = False
         instance.rounds = {}
+        round_name_list = []
         for round_name, round_id in item_data["rounds"].items():
             if round_id:
                 instance.rounds[round_name] = Round.from_json(round_id)
                 round_exist = True
+                round_name_list.append(round_name)
             else:
                 instance.rounds[round_name] = None
+        sorted(round_name_list)
 
         if round_exist:
             list_played_matches = []
@@ -103,16 +116,30 @@ class Tournament(_BaseModel):
         self._first_pairing_memory = self.pairing.initial_configuration
         self.pairing.generate_circle_configurations()
         match_pairs = self.pairing.generate_first_round_configuration()
-        round_1 = Round(f"Round_1", match_pairs)
-        self.rounds["Round_1"] = round_1
+        self.rounds["Round_1"] = Round(f"Round_1", match_pairs)
+        self.save_to_database()
 
     def end_round(self, round_key):
-        if round_key in self.rounds.keys():
+        current_round = self.check_current_round()
+        if round_key == current_round and self.rounds[round_key] != None:
             self.rounds[round_key].end_round()
             for match in self.rounds[round_key].matches:
-                for player, value in match.score.items():
-                    self.participants[player] = (self.participants[player][0], self.participants[player][1] + value)
-        self.save_to_database()
+                for player_id, value in match.score.items():
+                    self.participants[player_id] = (self.participants[player_id][0], self.participants[player_id][1] + value)
+            self.save_to_database()
+
+    def check_current_round(self):
+        list_of_round = []
+        for key, round in self.rounds.items():
+            if round:
+                list_of_round.append(key)
+        if list_of_round:
+            sorted(list_of_round)
+            for key in list_of_round:
+                if not self.rounds[key].is_finished:
+                    return key
+            new_round_number = int(list_of_round[-1].split("_")[-1]) + 1
+            return f"Round_{new_round_number}"
 
     def start_next_round(self):
         """
@@ -122,15 +149,23 @@ class Tournament(_BaseModel):
         store it in the DB.
         :return:
         """
-        pass
+        current_round = self.check_current_round()
+        if self.rounds[current_round] is not None:
+            print(f"current round : {current_round} is not finished.")
+            return
+
+        ranking = self.get_ranking()
+        next_pairing = self.pairing.generate_next_round_from_ranking(ranking)
+        self.rounds[current_round] = Round(name=current_round, matches_pairs=next_pairing)
+        self.save_to_database()
 
     def get_ranking(self):
-        scores = self.participants.copy()
-        sorted_scores = sorted(set(scores.values()), reverse=True)
+        scores = [score for player, score in self.participants.values()]
+        sorted_scores = sorted(set(scores), reverse=True)
         score_to_rank = {score: str(rank + 1) for rank, score in enumerate(sorted_scores)}
         output = {}
-        for key, value in scores.items():
-            rank = score_to_rank[value]
+        for key, value in self.participants.items():
+            rank = score_to_rank[value[1]]
             output.setdefault(rank, []).append(key)
         return output
 
@@ -142,32 +177,15 @@ class Tournament(_BaseModel):
                 f"Fin du tournoi : '{self.date_end}'\n"
                 f"Description du tournoi : '{self.description}'\n"
                 f"Nombre de rounds : '{self.rounds_number}'\n"
+                f"Classement : {self.get_ranking()}\n"
                 f"Liste des participants : {self.participants}\n"
                 f"Liste des rounds : {self.rounds}\n")
 
 
 def main():
-    # tournament_2 = Tournament(name="Tournoi de test",
-    #                           place="Test-land",
-    #                           date_start="2020-02-01",
-    #                           date_end="2020-02-02",
-    #                           description="Test description",
-    #                           rounds_number=4)
-    # participants = ['p_1', 'p_3', 'p_4', 'p_5']
-    # for participant in participants:
-    #     tournament_2.add_participant(participant)
-    # tournament_2.initialize_first_round()
-    # print(tournament_2.pairing.played_matches)
-    # print(tournament_2.pairing.list_of_players)
-    # print(tournament_2.pairing.initial_configuration)
-    # print(tournament_2.pairing.possibles_configurations)
-    # tournament_2.save_to_database()
+    tournament_2 = Tournament.from_json('t_1')
+    print(repr(tournament_2))
 
-    tournament_3 = Tournament.from_json("t_3")
-    print(tournament_3.pairing.possibles_configurations)
-    print(tournament_3.participants)
-    print(tournament_3.pairing.played_matches)
-    # tournament_3.save_to_database()
 
 
 if __name__ == "__main__":

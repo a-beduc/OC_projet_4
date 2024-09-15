@@ -65,6 +65,24 @@ class Pairing:
                     next_round = self.generate_round_configuration_from_match(match_test)
                     return next_round
 
+    def generate_next_round_from_ranking(self, dict_ranking):
+        ranking_key = []
+        for key in dict_ranking.keys():
+            ranking_key.append(key)
+        sorted(ranking_key)
+        i = 0
+        starting_list = dict_ranking[ranking_key[0]]
+        result = None
+        while not result:
+            list_test = starting_list.copy()
+            next_list = []
+            if i > 0:
+                next_list.extend(dict_ranking[ranking_key[i]])
+            list_test.extend(next_list)
+            result = self.try_to_generate_next_round(list_test)
+            i += 1
+        return result
+
     @classmethod
     def instantiate_pairing(cls, list_of_players, initial_configuration, list_played_matches):
         instance = cls(list_of_players=list_of_players,
@@ -103,7 +121,7 @@ def main():
     print(f"Match joué : {paired.played_matches}")
     print(paired.initial_configuration)
     print("-----------------")
-    y = paired.try_to_generate_next_round(['p_2', 'p_3', 'p_4'])
+    y = paired.try_to_generate_next_round(['p_2'])
     print(f"current round : {y}")
     print(f"reste configuration : {paired.possibles_configurations}")
     print(f"Match joué : {paired.played_matches}")
