@@ -1,7 +1,7 @@
 import curses
 
 
-menu = [' Tournaments ', ' Players ', ' Exit ']
+menu = [' Tournaments ', ' Players     ', ' Exit        ']
 ascii_art = [
     "                                                                            ",
     "                                                                        ()    ",
@@ -33,9 +33,7 @@ def print_menu(stdscr, selected_row_idx):
         x = w//2 - len(row)//2
         y = menu_start_y + idx
         if idx == selected_row_idx:
-            stdscr.attron(curses.color_pair(1))
-            stdscr.addstr(y, x, row)
-            stdscr.attroff(curses.color_pair(1))
+            stdscr.addstr(y, x, row, curses.A_REVERSE)
         else:
             stdscr.addstr(y, x, row)
 
@@ -44,8 +42,6 @@ def print_menu(stdscr, selected_row_idx):
 
 def main(stdscr):
     curses.curs_set(0)
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-
     current_row_idx = 0
 
     print_menu(stdscr, current_row_idx)
@@ -71,6 +67,8 @@ def main(stdscr):
             stdscr.getch()
             if current_row_idx == len(menu) - 1:
                 break
+        elif key == 27:
+            break
 
         print_menu(stdscr, current_row_idx)
 
