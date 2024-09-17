@@ -1,5 +1,4 @@
 import curses
-import time
 
 
 def main(stdscr):
@@ -76,21 +75,14 @@ def main(stdscr):
     score_wind.addstr(0, 2, " Ranking ")
 
     for idx, element in enumerate(name_text):
-        score_wind.addstr(idx+2, 2, f"{name_text[idx]}")
+        score_wind.addstr(idx + 2, 2, f"{name_text[idx]}")
     score_wind.refresh()
 
-    round_wind = outer_wind.derwin(height_bottom, width_left, height_black_top + height_top, 1)
-    round_wind.box()
-    round_wind.addstr(0, 2, " Round ")
-    round_wind.refresh()
-
-    height_round, width_round = round_wind.getmaxyx()
     height_match = 7
 
-    matches_wind = round_wind.derwin(height_round - height_match - 2, width_round - 2, 1, 1)
+    matches_wind = outer_wind.derwin(height_bottom - height_match, width_left, height_black_top + height_top, 1)
     matches_wind.box()
-    matches_wind.addstr(0, 2, " Matches ")
-
+    matches_wind.addstr(0, 2, " Round {x} ")
 
     results = {"R": " | Win Right ",
                "L": " | Win Left  ",
@@ -114,7 +106,7 @@ def main(stdscr):
     }
 
     matches_text = []
-    matches_target_length = width_round - 6
+    matches_target_length = width_left - 4
     for value in matches_dict.values():
         text_part_1 = value[0] + " "
         text_part_2 = value[1] + " vs " + value[2] + " "
@@ -128,15 +120,15 @@ def main(stdscr):
 
     matches_wind.refresh()
 
-    match_wind = round_wind.derwin(height_match, width_round - 2, height_round - height_match - 1, 1)
+    match_wind = outer_wind.derwin(height_match, width_left, height_bottom - height_match + height_top + 1, 1)
     match_wind.box()
-    match_wind.addstr(0, 2, " Match ")
+    match_wind.addstr(0, 2, " Selected Match ")
     match_wind.addstr(2, 2, "Match_ID : <m_1>")
     match_wind.addstr(3, 2, "Match : <Left Player> VS <Right Player>")
     match_wind.addstr(4, 2, "Status : Left Player Win | Right Player Win | Draw | Pending")
     match_wind.refresh()
 
-    time.sleep(10)
+    match_wind.getch()
 
 
 if __name__ == "__main__":
