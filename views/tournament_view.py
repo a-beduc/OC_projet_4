@@ -72,7 +72,7 @@ def main(stdscr):
         new_text = new_name + ("." * number_dots) + score
         name_text.append(new_text)
 
-    score_wind.addstr(0, 2, " Ranking ")
+    score_wind.addstr(0, 2, " Players ")
 
     for idx, element in enumerate(name_text):
         score_wind.addstr(idx + 2, 2, f"{name_text[idx]}")
@@ -127,6 +127,13 @@ def main(stdscr):
     match_wind.addstr(3, 2, "Match : <Left Player> VS <Right Player>")
     match_wind.addstr(4, 2, "Status : Left Player Win | Right Player Win | Draw | Pending")
     match_wind.refresh()
+    match_wind.getch()
+
+    rounds_wind = outer_wind.derwin(height_bottom, width_left, height_black_top + height_top, 1)
+    rounds_wind.clear()
+    rounds_wind.box()
+    rounds_wind.addstr(0, 2, " Rounds ")
+    rounds_wind.refresh()
 
     match_wind.getch()
 
