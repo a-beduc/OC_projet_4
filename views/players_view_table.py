@@ -3,6 +3,14 @@ from base_view_table import BaseView
 
 
 class PlayerView(BaseView):
+    SORTS_FIELDS = [
+            ['id'],
+            ['last_name', 'first_name', 'id'],
+            ['first_name', 'id'],
+            ['date_of_birth', 'id'],
+            ['chess_id', 'id']
+        ]
+
     def __init__(self, stdscr, data):
         super().__init__(stdscr, window_title=" List of Players ", data=data)
         self.command_wind = self.create_command_window("[↓][↑] Move, [s] Sort menu, [q] Quit",
@@ -37,68 +45,12 @@ class PlayerView(BaseView):
     @staticmethod
     def get_header_index(header_string):
         parts = header_string.split("│")
-        id_software = 0
-        id_last_name = 2 + len(parts[0])
-        id_first_name = 1 + id_last_name + len(parts[1])
-        id_date = 1 + id_first_name + len(parts[2])
-        id_chess = 1 + id_date + len(parts[3])
-        return id_software, id_last_name, id_first_name, id_date, id_chess
-
-    def create_sort_menu(self):
-        current_line_index = 0
-        indexes_values = self.get_header_index(self.content_headers)
-        strings_menu = self.content_headers.split(" │ ")
-        indexes = {i: (indexes_values[i], strings_menu[i]) for i in range(len(indexes_values))}
-
-        running = True
-
-        self.header_wind.clear()
-        self.header_wind.addstr(0, 1, self.content_headers)
-        self.header_wind.addstr(
-            0,
-            1 + indexes[current_line_index][0],
-            indexes[current_line_index][1],
-            curses.A_REVERSE,
-        )
-        self.header_wind.refresh()
-
-        while running:
-            key = self.outer_wind.getch()
-            if key == curses.KEY_RIGHT:
-                current_line_index = (current_line_index + 1) % len(indexes)
-            elif key == curses.KEY_LEFT:
-                current_line_index = (current_line_index - 1) % len(indexes)
-            elif key == curses.KEY_ENTER or key in [10, 13]:
-                if current_line_index == 0:
-                    self.sort_data(sort_fields=['id'])
-                    self.fill_pad()
-                elif current_line_index == 1:
-                    self.sort_data(sort_fields=['last_name', 'first_name', 'id'])
-                    self.fill_pad()
-                elif current_line_index == 2:
-                    self.sort_data(sort_fields=['first_name', 'id'])
-                    self.fill_pad()
-                elif current_line_index == 3:
-                    self.sort_data(sort_fields=['date_of_birth', 'id'])
-                    self.fill_pad()
-                elif current_line_index == 4:
-                    self.sort_data(sort_fields=['chess_id', 'id'])
-                    self.fill_pad()
-            elif key in [81, 113]:
-                running = False
-
-            self.header_wind.clear()
-            self.header_wind.addstr(0, 1, self.content_headers)
-            self.header_wind.addstr(
-                0,
-                1 + indexes[current_line_index][0],
-                indexes[current_line_index][1],
-                curses.A_REVERSE,
-            )
-            self.header_wind.refresh()
-
-        self.header_wind.addstr(0, 1, self.content_headers)
-        self.header_wind.refresh()
+        idx_id = 0
+        idx_last_name = 2 + len(parts[0])
+        idx_first_name = 1 + idx_last_name + len(parts[1])
+        idx_date = 1 + idx_first_name + len(parts[2])
+        idx_chess = 1 + idx_date + len(parts[3])
+        return idx_id, idx_last_name, idx_first_name, idx_date, idx_chess
 
     def create_general_menu(self):
         running = True
@@ -109,7 +61,7 @@ class PlayerView(BaseView):
             if key in [81, 113]:
                 running = False
             elif key in [83, 115]:
-                self.create_sort_menu()
+                self.create_sort_menu(self.SORTS_FIELDS, self.content_headers)
             elif key == curses.KEY_DOWN:
                 if pad_start_line < len(self.data) - self.content_height:
                     pad_start_line += 1
