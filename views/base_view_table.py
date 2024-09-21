@@ -36,13 +36,15 @@ class BaseView(ABC):
         outer_wind.refresh()
         return outer_wind
 
-    def create_command_window(self, first_line, second_line):
+    def create_command_window(self, first_line, second_line, third_line=""):
         command_wind = self.outer_wind.derwin(self.COMMAND_HEIGHT,
                                               self.inner_width,
                                               0,
                                               1)
         command_wind.addstr(2, (self.inner_width - len(first_line)) // 2, first_line)
         command_wind.addstr(3, (self.inner_width - len(second_line)) // 2, second_line)
+        if third_line != "":
+            command_wind.addstr(4, (self.inner_width - len(third_line)) // 2, third_line)
         command_wind.refresh()
         return command_wind
 
@@ -68,11 +70,6 @@ class BaseView(ABC):
     def create_content_pad(self):
         pad_height = max(len(self.data) + 1, self.content_height)
         self.content_pad = curses.newpad(pad_height, self.inner_width)
-
-        rows = self.content_pad.getmaxyx()[0]
-        for i in range(rows):
-            blank_line = self.create_separator_line(self.create_content(), blank=True)
-            self.content_pad.addstr(i, 1, blank_line)
         self.sort_data(sort_fields=['id'])
         self.fill_pad()
         self.content_pad.refresh(0, 0,
@@ -86,19 +83,14 @@ class BaseView(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def create_separator_line(content, blank=False):
+    def create_separator_line(content):
         separator = " │ "
         parts = content.split(separator)
         line = ""
         for i, part in enumerate(parts):
-            if not blank:
-                if i > 0:
-                    line += "─┼─"
-                line += "─" * len(part)
-            else:
-                if i > 0:
-                    line += " │ "
-                line += " " * len(part)
+            if i > 0:
+                line += "─┼─"
+            line += "─" * len(part)
         return line
 
     @abstractmethod
@@ -124,7 +116,7 @@ class BaseView(ABC):
 
     @staticmethod
     def sort_key(list_of_dict, sort_fields):
-        return sorted(list_of_dict, key=lambda x: tuple(x[field] for field in sort_fields))
+        return sorted(list_of_dict, key=lambda x: tuple([x[field] for field in sort_fields]))
 
     @abstractmethod
     def fill_pad(self):
@@ -135,9 +127,48 @@ class BaseView(ABC):
     def get_header_index(header_string):
         raise NotImplementedError
 
-    @abstractmethod
-    def create_sort_menu(self):
-        raise NotImplementedError
+    def create_sort_menu(self, sorts_fields_list, content_headers):
+        current_line_index = 0
+        indexes_values = self.get_header_index(content_headers)
+        strings_menu = content_headers.split(" │ ")
+        indexes = {i: (indexes_values[i], strings_menu[i]) for i in range(len(indexes_values))}
+
+        running = True
+
+        self.header_wind.clear()
+        self.header_wind.addstr(0, 1, content_headers)
+        self.header_wind.addstr(
+            0,
+            1 + indexes[current_line_index][0],
+            indexes[current_line_index][1],
+            curses.A_REVERSE
+        )
+        self.header_wind.refresh()
+
+        while running:
+            key = self.outer_wind.getch()
+            if key == curses.KEY_RIGHT:
+                current_line_index = (current_line_index + 1) % len(indexes)
+            elif key == curses.KEY_LEFT:
+                current_line_index = (current_line_index - 1) % len(indexes)
+            elif key == curses.KEY_ENTER or key in [10, 13]:
+                self.sort_data(sort_fields=sorts_fields_list[current_line_index])
+                self.fill_pad()
+            elif key in [81, 113]:
+                running = False
+
+            self.header_wind.clear()
+            self.header_wind.addstr(0, 1, content_headers)
+            self.header_wind.addstr(
+                0,
+                1 + indexes[current_line_index][0],
+                indexes[current_line_index][1],
+                curses.A_REVERSE,
+            )
+            self.header_wind.refresh()
+
+        self.header_wind.addstr(0, 1, content_headers)
+        self.header_wind.refresh()
 
     @abstractmethod
     def create_general_menu(self):
