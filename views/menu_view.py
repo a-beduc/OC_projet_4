@@ -27,14 +27,14 @@ class MenuView:
     }
 
     TOURNAMENT_MENU = {
-        ' New ': (0, 'new_tournament'),
-        ' Load ': (1, 'load_tournament'),
+        ' New Tournament ': (0, 'new_tournament'),
+        ' Load Tournament ': (1, 'load_tournament'),
         ' List Tournaments ': (2, 'list_tournaments'),
         ' Back ': (3, 'MAIN_MENU')
     }
 
     PLAYER_MENU = {
-        ' New ': (0, 'new_player'),
+        ' New Player ': (0, 'new_player'),
         ' List Players ': (1, 'list_players'),
         ' Back ': (2, 'MAIN_MENU')
     }
@@ -109,9 +109,7 @@ class MenuView:
             elif key == curses.KEY_ENTER or key in [10, 13]:
                 menu_items = sorted(self.current_menu.items(), key=lambda item: item[1][0])
                 selected_item = menu_items[current_line_index][1][1]
-                if selected_item == 'EXIT':
-                    exit()
-                elif selected_item in self.menus.keys():
+                if selected_item in self.menus.keys():
                     self.current_menu = self.menus[selected_item]
                     current_line_index = 0
                 else:

@@ -5,11 +5,11 @@ from models.tournament import Tournament
 def main():
     # Test new_tournament, do not handle draw yet, it was just to test a tournament
     new_tou = Tournament(name="Tournament test",
-                              place="Testland",
-                              date_start="2020-12-04",
-                              date_end="2020-12-05",
-                              description="test of a description",
-                              rounds_number=4)
+                         place="Testland",
+                         date_start="2020-12-04",
+                         date_end="2020-12-05",
+                         description="test of a description",
+                         rounds_number=4)
     list_of_players = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
     for player in list_of_players:
         new_tou.add_participant(player)
@@ -88,8 +88,6 @@ def main():
     print(new_tou.rounds)
     print('############')
     new_tou.save_to_database()
-
-
 
 
 if __name__ == '__main__':
