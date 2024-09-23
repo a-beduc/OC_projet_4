@@ -2,7 +2,7 @@ import curses
 from abc import ABC, abstractmethod
 
 
-class BaseView(ABC):
+class ViewTableBase(ABC):
     COMMAND_HEIGHT = 5
     HEADER_HEIGHT = 1
     SEPARATOR_HEIGHT = 1

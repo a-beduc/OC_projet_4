@@ -1,8 +1,8 @@
 import curses
-from base_view_table import BaseView
+from view_table_base import ViewTableBase
 
 
-class PlayerView(BaseView):
+class ViewTablePlayers(ViewTableBase):
     SORTS_FIELDS = [
             ['id'],
             ['last_name', 'first_name', 'id'],
@@ -148,7 +148,7 @@ def main(stdscr):
             "chess_id": "AA00010"
         }
     }
-    view = PlayerView(stdscr, data)
+    view = ViewTablePlayers(stdscr, data)
     view.create_general_menu()
 
 

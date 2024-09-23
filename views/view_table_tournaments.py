@@ -1,9 +1,9 @@
 import curses
 from curses.textpad import Textbox
-from base_view_table import BaseView
+from view_table_base import ViewTableBase
 
 
-class TournamentView(BaseView):
+class ViewTableTournaments(ViewTableBase):
     COMMAND_HEIGHT = 6
     SORTS_FIELDS = [
         ['id'],
@@ -241,7 +241,7 @@ def main(stdscr):
             "complete": False
         }
     }
-    view = TournamentView(stdscr, data)
+    view = ViewTableTournaments(stdscr, data)
     view.create_general_menu()
 
 

@@ -2,7 +2,7 @@ import curses
 from curses.textpad import Textbox
 
 
-class NewElement:
+class ViewForm:
     QUESTION_PLAYER = [
         ' Last Name : ',
         ' First Name : ',
@@ -31,10 +31,10 @@ class NewElement:
             self.element = element
             if element == 'new_player':
                 self.title = ' New Player '
-                self.question = NewElement.QUESTION_PLAYER
+                self.question = ViewForm.QUESTION_PLAYER
             else:
                 self.title = ' New Tournament '
-                self.question = NewElement.QUESTION_TOURNAMENT
+                self.question = ViewForm.QUESTION_TOURNAMENT
         self.stdscr = stdscr
         self.new_textboxes = True
         self.textboxes = []
@@ -57,11 +57,11 @@ class NewElement:
         return outer_wind
 
     def create_command_wind(self):
-        command_wind = self.outer_wind.derwin(len(NewElement.COMMANDS),
+        command_wind = self.outer_wind.derwin(len(ViewForm.COMMANDS),
                                               self.outer_wind.getmaxyx()[1] - 2,
                                               2,
                                               1)
-        for idx, line in enumerate(NewElement.COMMANDS):
+        for idx, line in enumerate(ViewForm.COMMANDS):
             x_position = (self.outer_wind.getmaxyx()[1] - len(line)) // 2
             command_wind.addstr(idx, x_position, line)
         command_wind.refresh()
@@ -152,7 +152,7 @@ class NewElement:
 
 
 def main(stdscr):
-    view = NewElement(stdscr, "new_tournament")
+    view = ViewForm(stdscr, "new_tournament")
     view.outer_wind.getch()
 
 

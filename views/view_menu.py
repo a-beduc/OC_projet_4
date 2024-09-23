@@ -1,7 +1,7 @@
 import curses
 
 
-class MenuView:
+class ViewMenu:
     ASCII_ART = [
         "                                                                        ()    ",
         "                                                                        /\\    ",
@@ -117,7 +117,7 @@ class MenuView:
 
 
 def main(stdscr):
-    menu = MenuView(stdscr)
+    menu = ViewMenu(stdscr)
     menu.base_wind.getch()
 
 
