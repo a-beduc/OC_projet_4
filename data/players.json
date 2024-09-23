@@ -35,6 +35,18 @@
             "first_name": "Magnus",
             "date_of_birth": "1990-11-30",
             "chess_id": "AA00010"
+        },
+        "p_7": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "date_of_birth": "1990-11-30",
+            "chess_id": "AA00010"
+        },
+        "p_8": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "date_of_birth": "1990-11-30",
+            "chess_id": "AA00010"
         }
     }
 }

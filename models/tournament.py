@@ -13,6 +13,7 @@ class Tournament(_BaseModel):
                  date_end: str,
                  description: str = "",
                  rounds_number: int = 4,
+                 complete: bool = False,
                  save_to_db: bool = True):
         """
         Initialize a new Tournament instance
@@ -35,6 +36,7 @@ class Tournament(_BaseModel):
         self.rounds = self.initialize_rounds_dict()
         self.pairing = None
         self._first_pairing_memory = None
+        self.complete = complete
         if save_to_db:
             self.save_to_database()
 
@@ -75,6 +77,7 @@ class Tournament(_BaseModel):
                        date_end=item_data["date_end"],
                        description=item_data["description"],
                        rounds_number=item_data["rounds_number"],
+                       complete=item_data["complete"],
                        save_to_db=False)
         instance.software_id = tournament_id
         instance._first_pairing_memory = item_data["first_pairing"]
@@ -142,7 +145,8 @@ class Tournament(_BaseModel):
 
             # Keep a memory of the first round pairing to allow instantiation of the same circle configuration when
             # reloading
-            "first_pairing": self._first_pairing_memory
+            "first_pairing": self._first_pairing_memory,
+            "complete": self.complete
         }
         return data
 

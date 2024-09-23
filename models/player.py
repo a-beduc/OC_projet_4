@@ -137,7 +137,7 @@ def main():
     Temporary function to test methods and objects
     :return:
     """
-    x = Player.get_data()
+    x = Player.get_data()['players']
     print(x)
     new_player = Player(first_name="Magnus", last_name="Carlsen",
                         date_of_birth="1990-11-30", chess_id="AA00010")
