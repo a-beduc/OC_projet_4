@@ -28,14 +28,13 @@ class ViewMenu:
 
     TOURNAMENT_MENU = {
         ' New Tournament ': (0, 'new_tournament'),
-        ' Load Tournament ': (1, 'load_tournament'),
-        ' List Tournaments ': (2, 'list_tournaments'),
-        ' Back ': (3, 'MAIN_MENU')
+        ' List Tournaments ': (1, 'view_tournaments'),
+        ' Back ': (2, 'MAIN_MENU')
     }
 
     PLAYER_MENU = {
         ' New Player ': (0, 'new_player'),
-        ' List Players ': (1, 'list_players'),
+        ' List Players ': (1, 'view_players'),
         ' Back ': (2, 'MAIN_MENU')
     }
 
@@ -43,18 +42,28 @@ class ViewMenu:
         curses.curs_set(0)
         self.stdscr = stdscr
         self.terminal_h, self.terminal_w = stdscr.getmaxyx()
-        self.base_wind = self.create_base_wind()
-        self.ascii_wind = self.create_ascii_wind()
-        self.menu_wind = self.create_menu_wind()
+        self.outer_wind = None
+        self.base_wind = None
+        self.ascii_wind = None
+        self.menu_wind = None
         self.menus = {
             'MAIN_MENU': self.MAIN_MENU,
             'TOURNAMENT_MENU': self.TOURNAMENT_MENU,
             'PLAYER_MENU': self.PLAYER_MENU
         }
+        self.current_menu = None
+
+    def initialize(self):
+        self.outer_wind = curses.newwin(self.terminal_h, self.terminal_w, 0, 0)
+        self.outer_wind.clear()
+        self.outer_wind.refresh()
+        self.base_wind = self.create_base_wind()
+        self.ascii_wind = self.create_ascii_wind()
+        self.menu_wind = self.create_menu_wind()
         self.current_menu = self.MAIN_MENU
-        self.start_menu()
 
     def create_base_wind(self):
+        self.stdscr.clear()
         base_wind = curses.newwin(self.MIN_TERMINAL_HEIGHT,
                                   self.MIN_TERMINAL_WIDTH,
                                   (self.terminal_h - self.MIN_TERMINAL_HEIGHT) // 2,
@@ -118,7 +127,7 @@ class ViewMenu:
 
 def main(stdscr):
     menu = ViewMenu(stdscr)
-    menu.base_wind.getch()
+    menu.start_menu()
 
 
 if __name__ == '__main__':
