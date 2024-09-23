@@ -1,8 +1,13 @@
 import curses
-from view_table_base import ViewTableBase
+from views.view_table_base import ViewTableBase
 
 
 class ViewTablePlayers(ViewTableBase):
+    COMMAND = [
+        "[↓][↑] Move, [s] Sort menu, [q] Quit",
+        "Sort: [←][→] Move, [Enter] Sort, [q] Back/Quit"
+    ]
+
     SORTS_FIELDS = [
             ['id'],
             ['last_name', 'first_name', 'id'],
@@ -11,12 +16,16 @@ class ViewTablePlayers(ViewTableBase):
             ['chess_id', 'id']
         ]
 
-    def __init__(self, stdscr, data):
-        super().__init__(stdscr, window_title=" List of Players ", data=data)
-        self.command_wind = self.create_command_window("[↓][↑] Move, [s] Sort menu, [q] Quit",
-                                                       "Sort: [←][→] Move, [Enter] Sort, [q] Back/Quit")
+    def __init__(self, stdscr, pad_height):
+        super().__init__(stdscr, pad_height)
+
+    def initialize(self):
+        self.outer_wind = self.create_outer_window(" List of Players ")
+        self.command_wind = self.create_command_window()
+        self.header_wind = self.create_header_wind()
+        self.separator_wind = self.create_separator_wind()
+        self.content_pad = self.create_content_pad()
         self.content_headers = self.create_content()
-        self.create_content_pad()
 
     def create_content(self, data=None):
         separator = " │ "
@@ -52,48 +61,33 @@ class ViewTablePlayers(ViewTableBase):
         idx_chess = 1 + idx_date + len(parts[3])
         return idx_id, idx_last_name, idx_first_name, idx_date, idx_chess
 
-    def create_general_menu(self):
+    def start_view(self, line_index=0):
         running = True
         pad_start_line = 0
-
         while running:
-            key = self.outer_wind.getch()
-            if key in [81, 113]:
-                running = False
-            elif key in [83, 115]:
-                self.create_sort_menu(self.SORTS_FIELDS, self.content_headers)
-            elif key == curses.KEY_DOWN:
-                if pad_start_line < len(self.data) - self.content_height:
-                    pad_start_line += 1
-            elif key == curses.KEY_UP:
-                if pad_start_line > 0:
-                    pad_start_line -= 1
-
             self.content_pad.refresh(pad_start_line, 0,
                                      self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
                                      2,
                                      self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
                                      self.content_height - 1,
                                      self.inner_width - 1)
+            key = self.outer_wind.getch()
+            if key in [81, 113]:
+                return 'BACK'
+            elif key in [83, 115]:
+                action = self.create_sort_menu(self.SORTS_FIELDS, self.content_headers, line_index)
+                if action is not None:
+                    return action
+            elif key == curses.KEY_DOWN:
+                if pad_start_line < self.pad_height - self.content_height:
+                    pad_start_line += 1
+            elif key == curses.KEY_UP:
+                if pad_start_line > 0:
+                    pad_start_line -= 1
 
-    def sort_data(self, sort_fields=['id']):
-        data_list = []
-        for key, value in self.data.items():
-            id_num = int(key.split('_')[1])
-            date_of_birth_list = value['date_of_birth'].split('-')
-            date_of_birth_num = int(''.join(date_of_birth_list))
-            data_list.append({
-                'id': id_num,
-                'last_name': value['last_name'],
-                'first_name': value['first_name'],
-                'date_of_birth': date_of_birth_num,
-                'chess_id': value['chess_id'],
-            })
-        self.sorted_content = self.sort_key(data_list, sort_fields)
-
-    def fill_pad(self):
+    def fill_pad(self, sorted_content):
         self.content_pad.clear()
-        for i, data in enumerate(self.sorted_content):
+        for i, data in enumerate(sorted_content):
             line = self.create_content(data)
             self.content_pad.addstr(i, 1, line)
         self.content_pad.refresh(0, 0,
@@ -101,56 +95,3 @@ class ViewTablePlayers(ViewTableBase):
                                  self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
                                  self.content_height - 1,
                                  self.inner_width - 1)
-
-
-def main(stdscr):
-    data = {
-        "p_1": {
-            "last_name": "Dupont",
-            "first_name": "Jean",
-            "date_of_birth": "1990-05-14",
-            "chess_id": "AA00001"
-        },
-        "p_2": {
-            "last_name": "Martin",
-            "first_name": "Marie",
-            "date_of_birth": "1988-09-23",
-            "chess_id": "AA00002"
-        },
-        "p_3": {
-            "last_name": "Durand",
-            "first_name": "Paul",
-            "date_of_birth": "1992-11-10",
-            "chess_id": "AA00003"
-        },
-        "p_4": {
-            "last_name": "Bernard",
-            "first_name": "Lucie",
-            "date_of_birth": "1995-03-08",
-            "chess_id": "AA00004"
-        },
-        "p_5": {
-            "last_name": "Dupont",
-            "first_name": "Océane",
-            "date_of_birth": "1992-11-10",
-            "chess_id": "AA00005"
-        },
-        "p_6": {
-            "last_name": "Carlsen",
-            "first_name": "Magnus",
-            "date_of_birth": "1990-11-30",
-            "chess_id": "AA00010"
-        },
-        "p_8965": {
-            "last_name": "LongNameTest",
-            "first_name": "",
-            "date_of_birth": "1963-12-03",
-            "chess_id": "AA00010"
-        }
-    }
-    view = ViewTablePlayers(stdscr, data)
-    view.create_general_menu()
-
-
-if __name__ == "__main__":
-    curses.wrapper(main)
