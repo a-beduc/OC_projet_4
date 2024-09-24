@@ -104,6 +104,61 @@
                 "p_19"
             ],
             "complete": true
+        },
+        "t_7": {
+            "name": "dsfsfs",
+            "place": "dfdsfsdf",
+            "date_start": "1900-12-01",
+            "date_end": "1901-01-12",
+            "description": "ffsdfsdf",
+            "participants": {},
+            "rounds_number": 7,
+            "rounds": {
+                "Round_1": null,
+                "Round_2": null,
+                "Round_3": null,
+                "Round_4": null,
+                "Round_5": null,
+                "Round_6": null,
+                "Round_7": null
+            },
+            "first_pairing": null,
+            "complete": false
+        },
+        "t_8": {
+            "name": "jdjd",
+            "place": "pf^posdfk",
+            "date_start": "2002-03-05",
+            "date_end": "2002-04-05",
+            "description": "testsfs dscr",
+            "participants": {},
+            "rounds_number": 6,
+            "rounds": {
+                "Round_1": null,
+                "Round_2": null,
+                "Round_3": null,
+                "Round_4": null,
+                "Round_5": null,
+                "Round_6": null
+            },
+            "first_pairing": null,
+            "complete": false
+        },
+        "t_9": {
+            "name": "564",
+            "place": "paris",
+            "date_start": "2024-10-11",
+            "date_end": "2024-10-13",
+            "description": "short",
+            "participants": {},
+            "rounds_number": 3,
+            "rounds": {
+                "Round_1": null,
+                "Round_2": null,
+                "Round_3": null
+            },
+            "first_pairing": null,
+            "complete": false
         }
     }
 }
