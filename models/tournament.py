@@ -195,6 +195,11 @@ class Tournament(_BaseModel):
                     self.participants[player_id] = (self.participants[player_id][0], self.participants[player_id][1] + value)
             self.save_to_database()
 
+            if all(rounds is not None and rounds.is_finished for rounds in self.rounds.values()):
+                self.complete = True
+                self.save_to_database()
+
+
     def check_current_round(self):
         """
         Check and return the current round of the tournament.
