@@ -74,7 +74,7 @@ class Match(_BaseModel):
         """
         if not self.is_finished:
             if player_software_id in self.score:
-                self.score[player_software_id] = 1
+                self.score[player_software_id] = 1.0
                 self.is_finished = True
                 self.save_to_database()
             else:
