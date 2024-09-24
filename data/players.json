@@ -1,52 +1,154 @@
 {
     "players": {
         "p_1": {
-            "last_name": "Dupont",
-            "first_name": "Jean",
-            "date_of_birth": "1990-05-14",
-            "chess_id": "AA00001"
+            "last_name": "Capablanca",
+            "first_name": "Jos\u00e9",
+            "date_of_birth": "1888-11-19",
+            "chess_id": "AA0001"
         },
         "p_2": {
-            "last_name": "Martin",
-            "first_name": "Marie",
-            "date_of_birth": "1988-09-23",
-            "chess_id": "AA00002"
+            "last_name": "Fischer",
+            "first_name": "Bobby",
+            "date_of_birth": "1943-03-09",
+            "chess_id": "AA0002"
         },
         "p_3": {
-            "last_name": "Durand",
-            "first_name": "Paul",
-            "date_of_birth": "1992-11-10",
-            "chess_id": "AA00003"
+            "last_name": "Kasparov",
+            "first_name": "Garry",
+            "date_of_birth": "1963-04-13",
+            "chess_id": "AA0003"
         },
         "p_4": {
-            "last_name": "Bernard",
-            "first_name": "Lucie",
-            "date_of_birth": "1995-03-08",
-            "chess_id": "AA00004"
+            "last_name": "Karpov",
+            "first_name": "Anatoly",
+            "date_of_birth": "1951-05-23",
+            "chess_id": "AA0004"
         },
         "p_5": {
-            "last_name": "Dupont",
-            "first_name": "Oc\u00e9ane",
-            "date_of_birth": "1992-11-10",
-            "chess_id": "AA00005"
+            "last_name": "Spassky",
+            "first_name": "Boris",
+            "date_of_birth": "1937-01-30",
+            "chess_id": "AA0005"
         },
         "p_6": {
-            "last_name": "Carlsen",
-            "first_name": "Magnus",
-            "date_of_birth": "1990-11-30",
-            "chess_id": "AA00010"
+            "last_name": "Tal",
+            "first_name": "Mikhail",
+            "date_of_birth": "1936-11-09",
+            "chess_id": "AA0006"
         },
         "p_7": {
-            "last_name": "Carlsen",
-            "first_name": "Magnus",
-            "date_of_birth": "1990-11-30",
-            "chess_id": "AA00010"
+            "last_name": "Alekhine",
+            "first_name": "Alexander",
+            "date_of_birth": "1892-10-31",
+            "chess_id": "AA0007"
         },
         "p_8": {
+            "last_name": "Botvinnik",
+            "first_name": "Mikhail",
+            "date_of_birth": "1911-08-17",
+            "chess_id": "AA0008"
+        },
+        "p_9": {
+            "last_name": "Smyslov",
+            "first_name": "Vasily",
+            "date_of_birth": "1921-03-24",
+            "chess_id": "AA0009"
+        },
+        "p_10": {
+            "last_name": "Petrosian",
+            "first_name": "Tigran",
+            "date_of_birth": "1929-06-17",
+            "chess_id": "AA0010"
+        },
+        "p_11": {
+            "last_name": "Lasker",
+            "first_name": "Emanuel",
+            "date_of_birth": "1868-12-24",
+            "chess_id": "AA0011"
+        },
+        "p_12": {
+            "last_name": "Steinitz",
+            "first_name": "Wilhelm",
+            "date_of_birth": "1836-05-17",
+            "chess_id": "AA0012"
+        },
+        "p_13": {
+            "last_name": "Kramnik",
+            "first_name": "Vladimir",
+            "date_of_birth": "1975-06-25",
+            "chess_id": "AA0013"
+        },
+        "p_14": {
             "last_name": "Carlsen",
             "first_name": "Magnus",
             "date_of_birth": "1990-11-30",
-            "chess_id": "AA00010"
+            "chess_id": "AA0014"
+        },
+        "p_15": {
+            "last_name": "Anand",
+            "first_name": "Viswanathan",
+            "date_of_birth": "1969-12-11",
+            "chess_id": "AA0015"
+        },
+        "p_16": {
+            "last_name": "Ivanchuk",
+            "first_name": "Vassily",
+            "date_of_birth": "1969-03-18",
+            "chess_id": "AA0016"
+        },
+        "p_17": {
+            "last_name": "Shirov",
+            "first_name": "Alexei",
+            "date_of_birth": "1972-07-04",
+            "chess_id": "AA0017"
+        },
+        "p_18": {
+            "last_name": "Morozevich",
+            "first_name": "Alexander",
+            "date_of_birth": "1977-07-18",
+            "chess_id": "AA0018"
+        },
+        "p_19": {
+            "last_name": "Aronian",
+            "first_name": "Levon",
+            "date_of_birth": "1982-10-06",
+            "chess_id": "AA0019"
+        },
+        "p_20": {
+            "last_name": "Polgar",
+            "first_name": "Judit",
+            "date_of_birth": "1976-07-23",
+            "chess_id": "AA0020"
+        },
+        "p_21": {
+            "last_name": "Gelfand",
+            "first_name": "Boris",
+            "date_of_birth": "1968-06-24",
+            "chess_id": "AA0021"
+        },
+        "p_22": {
+            "last_name": "Nakamura",
+            "first_name": "Hikaru",
+            "date_of_birth": "1987-12-09",
+            "chess_id": "AA0022"
+        },
+        "p_23": {
+            "last_name": "Grischuk",
+            "first_name": "Alexander",
+            "date_of_birth": "1983-10-31",
+            "chess_id": "AA0023"
+        },
+        "p_24": {
+            "last_name": "Ding",
+            "first_name": "Liren",
+            "date_of_birth": "1992-10-24",
+            "chess_id": "AA0024"
+        },
+        "p_25": {
+            "last_name": "Karjakin",
+            "first_name": "Sergey",
+            "date_of_birth": "1990-01-12",
+            "chess_id": "AA0025"
         }
     }
 }

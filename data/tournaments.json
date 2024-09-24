@@ -1,18 +1,20 @@
 {
     "tournaments": {
         "t_1": {
-            "name": "Tournament test",
-            "place": "Testland",
+            "name": "Tournoi de test",
+            "place": "Testville",
             "date_start": "2020-12-04",
             "date_end": "2020-12-05",
-            "description": "test of a description",
+            "description": "Ceci est un test du tournoi",
             "participants": {
-                "p_1": 4,
-                "p_2": 3,
-                "p_3": 2,
-                "p_4": 2,
-                "p_5": 1,
-                "p_6": 0
+                "p_1": 1.0,
+                "p_2": 2.0,
+                "p_3": 1.5,
+                "p_4": 3.0,
+                "p_5": 2.0,
+                "p_6": 3.0,
+                "p_7": 1.5,
+                "p_8": 2.0
             },
             "rounds_number": 4,
             "rounds": {
@@ -22,14 +24,86 @@
                 "Round_4": "r_4"
             },
             "first_pairing": [
-                "p_2",
+                "p_8",
                 "p_4",
+                "p_3",
                 "p_5",
-                "p_1",
                 "p_6",
-                "p_3"
+                "p_1",
+                "p_2",
+                "p_7"
             ],
-            "complete": false
+            "complete": true
+        },
+        "t_2": {
+            "name": "Tournoi de test",
+            "place": "Testville",
+            "date_start": "2020-12-04",
+            "date_end": "2020-12-05",
+            "description": "Ceci est un test du tournoi",
+            "participants": {
+                "p_9": 2.0,
+                "p_10": 2.5,
+                "p_11": 1.5,
+                "p_12": 2.0,
+                "p_13": 2.5,
+                "p_14": 2.0,
+                "p_15": 2.5,
+                "p_16": 1.0
+            },
+            "rounds_number": 4,
+            "rounds": {
+                "Round_1": "r_5",
+                "Round_2": "r_6",
+                "Round_3": "r_7",
+                "Round_4": "r_8"
+            },
+            "first_pairing": [
+                "p_16",
+                "p_12",
+                "p_14",
+                "p_15",
+                "p_11",
+                "p_10",
+                "p_9",
+                "p_13"
+            ],
+            "complete": true
+        },
+        "t_3": {
+            "name": "Tournoi de test3",
+            "place": "Testtown",
+            "date_start": "2020-12-10",
+            "date_end": "2020-12-16",
+            "description": "Ceci est un test du tournoi, le test 3",
+            "participants": {
+                "p_1": 3.0,
+                "p_2": 3.0,
+                "p_3": 2.0,
+                "p_4": 1.5,
+                "p_17": 0.5,
+                "p_18": 2.0,
+                "p_19": 1.5,
+                "p_20": 2.5
+            },
+            "rounds_number": 4,
+            "rounds": {
+                "Round_1": "r_9",
+                "Round_2": "r_10",
+                "Round_3": "r_11",
+                "Round_4": "r_12"
+            },
+            "first_pairing": [
+                "p_18",
+                "p_4",
+                "p_20",
+                "p_17",
+                "p_3",
+                "p_2",
+                "p_1",
+                "p_19"
+            ],
+            "complete": true
         }
     }
 }
