@@ -27,9 +27,9 @@ class ViewForm:
 
     def __init__(self, stdscr, element):
         curses.curs_set(0)
-        if element in ['new_player', 'new_tournament']:
+        if element in ['NEW_PLAYER', 'NEW_TOURNAMENT']:
             self.element = element
-            if element == 'new_player':
+            if element == 'NEW_PLAYER':
                 self.title = ' New Player '
                 self.question = ViewForm.QUESTION_PLAYER
             else:
@@ -39,12 +39,21 @@ class ViewForm:
         self.new_textboxes = True
         self.textboxes = []
         self.terminal_h, self.terminal_w = stdscr.getmaxyx()
+        self.outer_wind = None
+        self.command_wind = None
+        self.menu_wind = None
+        self.error_wind = None
+        self.validation_wind = None
+
+    def initialize(self):
+        self.new_textboxes = True
+        self.textboxes = []
         self.outer_wind = self.create_outer_wind()
         self.command_wind = self.create_command_wind()
         self.menu_wind = self.create_menu_wind()
+        self.error_wind = self.create_error_wind()
         self.validation_wind = self.create_validation_wind()
         self.print_menu()
-        self.start_menu()
 
     def create_outer_wind(self):
         outer_wind = curses.newwin(24, 80,
@@ -91,6 +100,13 @@ class ViewForm:
         validation_wind.refresh()
         return validation_wind
 
+    def create_error_wind(self):
+        error_wind = self.outer_wind.derwin(3,
+                                            40,
+                                            4 + self.command_wind.getmaxyx()[0] + self.menu_wind.getmaxyx()[0],
+                                            (self.outer_wind.getmaxyx()[1] - 40) // 2)
+        return error_wind
+
     def create_textbox(self, index_y):
         id_textbox = index_y // 2
         new_wind = self.outer_wind.derwin(1, (self.outer_wind.getmaxyx()[1] - 2) // 2,
@@ -116,14 +132,24 @@ class ViewForm:
                                   curses.A_REVERSE)
         self.menu_wind.refresh()
 
-    def start_menu(self):
+    def start_view(self, error_msg=''):
+        if error_msg != '':
+            self.error_wind.clear()
+            self.error_wind.addstr(1, (self.error_wind.getmaxyx()[1] - len(error_msg)) // 2, error_msg)
+            self.error_wind.addstr(2, (self.error_wind.getmaxyx()[1] - len('[press any key]')) // 2, '[press any key]')
+            self.error_wind.refresh()
+            self.outer_wind.getch()
+            self.error_wind.clear()
+            self.error_wind.refresh()
+            self.validation_wind.addstr(0, 0, " >>> CONFIRM <<< ")
+            self.validation_wind.refresh()
         running = True
         current_line_index = 0
         while running:
             self.print_menu(current_line_index)
             key = self.outer_wind.getch()
-            if key in [81, 113]:
-                return 'quit'
+            if key in [81, 113]:  # 'Q' or 'q'
+                return 'BACK'
             elif key == curses.KEY_DOWN:
                 current_line_index = (current_line_index + 2) % (len(self.question) * 2)
             elif key == curses.KEY_UP:
@@ -133,27 +159,33 @@ class ViewForm:
                 textbox_id = current_line_index // 2
                 self.textboxes[textbox_id][2].edit()
                 curses.curs_set(0)
-            elif key in [86, 118]:
-                self.print_menu()
+            elif key in [86, 118]:  # 'V' or 'v'
+                action = self.validation_button()
+                if action is not 'BACK':
+                    return action
+
+    def validation_button(self):
+        self.print_menu()
+        self.validation_wind.clear()
+        self.validation_wind.addstr(0, 0, " >>> CONFIRM <<< ", curses.A_REVERSE)
+        self.validation_wind.refresh()
+        second_running = True
+        while second_running:
+            second_key = self.outer_wind.getch()
+            if second_key == curses.KEY_ENTER or second_key in [10, 13]:
+                form_content = [item[2].gather().strip() for item in self.textboxes]
+                return 'VALIDATE', self.element, form_content
+            elif second_key in [66, 98]:  # 'B' or 'b'
                 self.validation_wind.clear()
-                self.validation_wind.addstr(0, 0, " >>> CONFIRM <<< ", curses.A_REVERSE)
+                self.validation_wind.addstr(0, 0, " >>> CONFIRM <<< ")
                 self.validation_wind.refresh()
-                second_running = True
-                while second_running:
-                    second_key = self.outer_wind.getch()
-                    if second_key == curses.KEY_ENTER or second_key in [10, 13]:
-                        form_content = [item[2].gather().strip() for item in self.textboxes]
-                        return form_content
-                    elif second_key in [66, 98]:
-                        self.validation_wind.clear()
-                        self.validation_wind.addstr(0, 0, " >>> CONFIRM <<< ")
-                        self.validation_wind.refresh()
-                        second_running = False
+                return 'BACK'
 
 
 def main(stdscr):
-    view = ViewForm(stdscr, "new_tournament")
-    view.outer_wind.getch()
+    view = ViewForm(stdscr, "NEW_TOURNAMENT")
+    view.initialize()
+    view.start_view()
 
 
 if __name__ == '__main__':

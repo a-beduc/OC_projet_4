@@ -1,10 +1,17 @@
 import curses
 from curses.textpad import Textbox
-from view_table_base import ViewTableBase
+from views.view_table_base import ViewTableBase
 
 
 class ViewTableTournaments(ViewTableBase):
     COMMAND_HEIGHT = 6
+
+    COMMAND = [
+        "[↓][↑] Move, [s] Sort menu, [q] Quit",
+        "[n] New Tournament, [l] Load Tournament",
+        "Sort: [←][→] Move, [Enter] Sort, [q] Back/Quit"
+    ]
+
     SORTS_FIELDS = [
         ['id'],
         ['name', 'id'],
@@ -16,13 +23,16 @@ class ViewTableTournaments(ViewTableBase):
         ['complete', 'id']
     ]
 
-    def __init__(self, stdscr, data):
-        super().__init__(stdscr, window_title=" List of Tournaments ", data=data)
-        self.command_wind = self.create_command_window("[↓][↑] Move, [s] Sort menu, [q] Quit",
-                                                       "[n] New Tournament, [l] Load Tournament",
-                                                       "Sort: [←][→] Move, [Enter] Sort, [q] Back/Quit")
+    def __init__(self, stdscr, pad_height):
+        super().__init__(stdscr, pad_height)
+
+    def initialize(self):
+        self.outer_wind = self.create_outer_window(" List of Tournaments ")
+        self.command_wind = self.create_command_window()
+        self.header_wind = self.create_header_wind()
+        self.separator_wind = self.create_separator_wind()
+        self.content_pad = self.create_content_pad()
         self.content_headers = self.create_content()
-        self.create_content_pad()
 
     def create_content(self, data=None):
         separator = " │ "
@@ -78,69 +88,40 @@ class ViewTableTournaments(ViewTableBase):
         idx_complete = 1 + idx_rounds + len(parts[6])
         return idx_id, idx_name, idx_place, idx_date_start, idx_date_end, idx_participants, idx_rounds, idx_complete
 
-    def create_general_menu(self):
+    def start_view(self, line_index=0):
         running = True
         pad_start_line = 0
-
         while running:
-            key = self.outer_wind.getch()
-
-            if key == curses.KEY_DOWN:
-                if pad_start_line < len(self.data) - self.content_height:
-                    pad_start_line += 1
-            elif key == curses.KEY_UP:
-                if pad_start_line > 0:
-                    pad_start_line -= 1
-
-            elif key in [83, 115]:  # 'S' or 's'
-                self.create_sort_menu(self.SORTS_FIELDS, self.content_headers)
-
-            elif key in [81, 113]:  # 'Q' or 'q'
-                return "quit"
-
-            elif key in [78, 110]:  # 'N' or 'n'
-                return "new_tournament"
-
-            elif key in [76, 108]:  # 'L' or 'l'
-                input_value = self.create_load_tournament_wind()
-                curses.curs_set(0)
-                self.refresh_main_view()
-                if type(input_value) is int:
-                    self.create_error_message()
-                    self.refresh_main_view()
-                else:
-                    pass
-
             self.content_pad.refresh(pad_start_line, 0,
                                      self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
                                      2,
                                      self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
                                      self.content_height - 1,
                                      self.inner_width - 1)
+            key = self.outer_wind.getch()
+            if key in [81, 113]:  # 'Q' or 'q'
+                return 'BACK'
+            elif key in [83, 115]:  # 'S' or 's'
+                action = self.create_sort_menu(self.SORTS_FIELDS, self.content_headers, line_index)
+                if action is not None:
+                    return action
+            elif key == curses.KEY_DOWN:
+                if pad_start_line < self.pad_height - self.content_height:
+                    pad_start_line += 1
+            elif key == curses.KEY_UP:
+                if pad_start_line > 0:
+                    pad_start_line -= 1
+            elif key in [78, 110]:  # 'N' or 'n'
+                return "NEW_TOURNAMENT"
+            elif key in [76, 108]:  # 'L' or 'l'
+                action = self.create_load_tournament_wind()
+                curses.curs_set(0)
+                if action is not None:
+                    return 'LOAD_TOURNAMENT', action
 
-    def sort_data(self, sort_fields=['id']):
-        data_list = []
-        for key, value in self.data.items():
-            id_num = int(key.split("_")[1])
-            date_start_list = value['date_start'].split('-')
-            date_start_num = int(''.join(date_start_list))
-            date_end_list = value['date_end'].split('-')
-            date_end_num = int(''.join(date_end_list))
-            data_list.append({
-                'id': id_num,
-                'name': value['name'],
-                'place': value['place'],
-                'date_start': date_start_num,
-                'date_end': date_end_num,
-                'participants': value['participants'],
-                'rounds': value['rounds'],
-                'complete': value['complete']
-            })
-        self.sorted_content = self.sort_key(data_list, sort_fields)
-
-    def fill_pad(self):
+    def fill_pad(self, sorted_content):
         self.content_pad.clear()
-        for i, data in enumerate(self.sorted_content):
+        for i, data in enumerate(sorted_content):
             line = self.create_content(data)
             self.content_pad.addstr(i, 1, line)
         self.content_pad.refresh(0, 0,
@@ -176,74 +157,7 @@ class ViewTableTournaments(ViewTableBase):
         box = Textbox(input_win)
         curses.curs_set(1)
         box.edit()
-        return box.gather()
-
-    def refresh_main_view(self):
-        self.command_wind.clear()
-        self.command_wind.refresh()
-        self.outer_wind = self.create_outer_window(" List of Tournaments ")
-        self.command_wind = self.create_command_window(
-            "[↓][↑] Move, [s] Sort menu, [q] Quit",
-            "[n] New Tournament, [l] Load Tournament",
-            "Sort: [←][→] Move, [Enter] Sort, [q] Back/Quit"
-        )
-        self.header_wind.clear()
-        self.header_wind.refresh()
-        self.header_wind = self.create_header_wind()
-        self.separator_wind.clear()
-        self.separator_wind.refresh()
-        self.separator_wind = self.create_separator_wind()
-        self.content_pad.refresh(0, 0,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT, 2,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
-                                 self.content_height - 1,
-                                 self.inner_width - 1)
-
-    def create_error_message(self):
-        clearing_space_height = 5
-        clearing_space_width = 22
-        clearing_wind = self.outer_wind.derwin(clearing_space_height, clearing_space_width,
-                                               (self.outer_height - clearing_space_height) // 2,
-                                               (self.outer_width - clearing_space_width) // 2)
+        user_input = box.gather().lstrip('0').strip()
         clearing_wind.clear()
         clearing_wind.refresh()
-
-        error_window = clearing_wind.derwin(clearing_space_height - 2, clearing_space_width - 2, 1, 1)
-        error_window.clear()
-        error_window.box()
-        text = " ERROR "
-        width_error = error_window.getmaxyx()[1]
-        error_window.addstr(0, (width_error - len(text)) // 2, text)
-        text_2 = "ID is not valid"
-        error_window.addstr(1, (width_error - len(text_2)) // 2, text_2)
-        error_window.refresh()
-        self.outer_wind.getch()
-
-
-def main(stdscr):
-    data = {
-        "t_1": {
-            "name": "Tournament test",
-            "place": "Testland",
-            "date_start": "2020-12-04",
-            "date_end": "2020-12-05",
-            "participants": 6,
-            "rounds": 4,
-            "complete": True
-        },
-        "t_2": {
-            "name": "Tcsdfdsfourfefement test",
-            "place": "Tesfsfsfnd fdsf sdfs",
-            "date_start": "2020-12-04",
-            "date_end": "2021-01-05",
-            "participants": 12,
-            "rounds": 8,
-            "complete": False
-        }
-    }
-    view = ViewTableTournaments(stdscr, data)
-    view.create_general_menu()
-
-
-if __name__ == '__main__':
-    curses.wrapper(main)
+        return user_input

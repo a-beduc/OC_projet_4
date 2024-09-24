@@ -33,7 +33,7 @@ class ViewTablePlayers(ViewTableBase):
         last_name = "Last Name"
         first_name = "First Name"
         birth_date_header = "Birth Date"
-        chess_id_header = "ChessID"
+        chess_id_header = "ChessID "
 
         fixed_length = len(software_id_header) + len(birth_date_header) + len(chess_id_header) + (4 * len(separator))
         name_length = (self.inner_width - fixed_length - 2) // 2

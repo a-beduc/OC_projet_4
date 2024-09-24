@@ -27,14 +27,14 @@ class ViewMenu:
     }
 
     TOURNAMENT_MENU = {
-        ' New Tournament ': (0, 'new_tournament'),
-        ' List Tournaments ': (1, 'view_tournaments'),
+        ' New Tournament ': (0, 'NEW_TOURNAMENT'),
+        ' List Tournaments ': (1, 'VIEW_TOURNAMENT'),
         ' Back ': (2, 'MAIN_MENU')
     }
 
     PLAYER_MENU = {
-        ' New Player ': (0, 'new_player'),
-        ' List Players ': (1, 'view_players'),
+        ' New Player ': (0, 'NEW_PLAYER'),
+        ' List Players ': (1, 'VIEW_PLAYER'),
         ' Back ': (2, 'MAIN_MENU')
     }
 
