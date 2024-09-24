@@ -4,14 +4,21 @@ from models.player import Player
 
 class ControllerTablePlayer:
     def __init__(self, stdscr):
+        self.stdscr = stdscr
+        self.data = None
+        self.pad_height = None
+        self.sorted_content = None
+        self.player_table_view = None
+
+    def update_from_database(self):
         self.data = Player.get_data()['players']
         self.pad_height = len(self.data)
         self.sorted_content = []
         self.sort_data(['id'])
-
-        self.player_table_view = ViewTablePlayers(stdscr, self.pad_height)
+        self.player_table_view = ViewTablePlayers(self.stdscr, self.pad_height)
 
     def start(self):
+        self.update_from_database()
         self.player_table_view.initialize()
         line_index = 0
         while True:
