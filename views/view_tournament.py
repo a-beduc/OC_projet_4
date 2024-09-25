@@ -35,24 +35,10 @@ class ViewTournament:
         '[q] Quit'
     ]
 
-    temporary_name_score = [("Dupont", "Jean", 1),
-                            ("Martin", "Mamamadddad", 2),
-                            ("Durand", "Pddsdsqfd", 2.5),
-                            ("Bernard", "Ldsqdqsd6sdqqs", 5),
-                            ("Dupont", "Odvoisvsovdsv", 0),
-                            ("Carlsen", "Mamamadddad_2", 80),
-                            ("Dupont", "Jean_2", 8),
-                            ("Martin", "Mamamadddad_2", 8),
-                            ("Durand", "Pddsdsqfd_2", 8.5),
-                            ("Bernard", "Ldsqdqsd6sdqqs_2", 8),
-                            ("Dupont", "Odvoisvsovdsv_2", 8),
-                            ("Carlsen", "Mamamadddad_3", 40),
-                            ("Dupont", "Jean_3", 51),
-                            ("Martin", "Mamamadddad_3", 52),
-                            ("Durand", "Pddsdsqfd_3", 52.5),
-                            ("Bernard", "Ldsqdqsd6sdqqs_3", 55),
-                            ("Dupont", "Odvoisvsovdsv_3", 50),
-                            ("Last", "Element", 10)]
+    SORT_FIELDS = [
+        ['last_name', 'first_name', 'score'],
+        ['score', 'last_name', 'first_name']
+    ]
 
     def __init__(self, stdscr):
         self.stdscr = stdscr
@@ -68,8 +54,17 @@ class ViewTournament:
             'command_round': self.COMMAND_ROUND,
             'command_match': self.COMMAND_MATCH
         }
-        self.players = self.temporary_name_score.copy()
 
+        self.players = None
+        self.outer_wind = None
+        self.info_wind = None
+        self.command_wind = None
+        self.tournament_wind = None
+        self.player_wind = None
+        self.player_pad = None
+
+    def initialize(self, name_score):
+        self.players = name_score
         self.outer_wind = self.create_outer_wind()
         self.info_wind = self.create_information_wind()
         self.command_wind = self.create_command_wind()
@@ -77,7 +72,6 @@ class ViewTournament:
         self.player_wind = self.create_player_wind()
         self.player_pad = self.create_player_pad()
         self.update_player_pad(self.players)
-        self.start()
 
     def create_outer_wind(self, title="{{default_title}}"):
         outer_wind = curses.newwin(self.outer_wind_height, self.outer_wind_width, 0, 0)
@@ -142,8 +136,9 @@ class ViewTournament:
     def reformat_name_score(self, player_name_score):
         separator = ' | '
         target_length = self.right_wind_width - 6 - len(separator) - len('Score')
-        player_string = self.reformat_name(player_name_score[:2], target_length)
-        score_string = str(player_name_score[2]).ljust(len('Score'))
+        player_string = self.reformat_name([player_name_score['last_name'], player_name_score['first_name']],
+                                           target_length)
+        score_string = str(player_name_score['score']).ljust(len('Score'))
         return separator.join([player_string, score_string])
 
     def create_player_pad(self):
@@ -167,15 +162,21 @@ class ViewTournament:
                                              9, self.left_wind_width + 1)
         player_wind.box()
         player_wind.addstr(0, 2, ' Player ')
-        text_menu = self.reformat_name_score(('Last Name', 'First Name', 'Score'))
+        text_menu = self.reformat_name_score({'last_name': 'Last Name',
+                                              'first_name': 'First Name',
+                                              'score': 'Score'})
         player_wind.addstr(2, 3, text_menu)
         player_wind.refresh()
         return player_wind
 
-    def start(self):
+    def start_view(self, memory_key=None):
         running = True
         while running:
-            key = self.outer_wind.getch()
+            if memory_key is not None:
+                key = memory_key
+                memory_key = None
+            else:
+                key = self.outer_wind.getch()
             if key in [84, 116]:  # 'T'  or 't'
                 self.tournament_wind.addstr(0, 2, ' Tournament ', curses.A_REVERSE)
                 self.tournament_wind.refresh()
@@ -188,17 +189,18 @@ class ViewTournament:
                 self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
                 self.player_wind.refresh()
                 self.command_wind = self.create_command_wind('command_player')
-                self.start_player_menu()
+                action = self.start_player_menu()
                 self.player_wind.addstr(0, 2, ' Player ')
                 self.player_wind.refresh()
                 self.command_wind = self.create_command_wind()
+                if action is not None:
+                    return action
             elif key in [81, 113]:  # 'Q' or 'q'
-                running = False
+                return 'EXIT'
 
     def start_player_menu(self):
-        running = True
         pad_start_line = 0
-        while running:
+        while True:
             self.player_pad.refresh(pad_start_line, 0,
                                     13, self.left_wind_width + 4,
                                     self.outer_wind_height - 3, self.outer_wind_width - 3)
@@ -210,7 +212,44 @@ class ViewTournament:
                 if pad_start_line > 0:
                     pad_start_line -= 1
             elif key in [81, 113]:  # 'Q' or 'q'
-                running = False
+                return
+            elif key in [83, 115]:  # 'S' or 's'
+                return 'SORT', self.SORT_FIELDS[1], True
+            elif key in [80, 112]:  # 'P' or 'p'
+                return 'SORT', self.SORT_FIELDS[0], False
+
+    @staticmethod
+    def get_header_index(header_string):
+        parts = header_string.split('|')
+        idx_name = 0
+        idx_score = 2 + len(parts[0])
+        return idx_name, idx_score
+
+    def start_sort_menu(self):
+        current_line_index = 0
+        header_string = self.reformat_name_score(('Last Name', 'First Name', 'Score'))
+        indexes_values = self.get_header_index(header_string)
+        strings_menu = header_string.split(' | ')
+        indexes = {i: (indexes_values[i], strings_menu[i]) for i in range(len(indexes_values))}
+
+        running = True
+
+        while running:
+            self.player_wind.addstr(2, 3, header_string)
+            self.player_wind.addstr(2, 3 + indexes[current_line_index][0], indexes[current_line_index][1],
+                                    curses.A_REVERSE)
+            self.player_wind.refresh()
+
+            key = self.player_wind.getch()
+            if key == curses.KEY_RIGHT:
+                current_line_index = (current_line_index + 1) % len(indexes)
+            elif key == curses.KEY_LEFT:
+                current_line_index = (current_line_index - 1) % len(indexes)
+            elif key == curses.KEY_ENTER or key in [10, 13]:
+                if current_line_index == 0:
+                    return 'SORT', 'NAME'
+                elif current_line_index == 1:
+                    return 'SORT', 'SCORE'
 
 
 def main(stdscr):
