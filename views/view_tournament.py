@@ -2,6 +2,14 @@ import curses
 
 
 class ViewTournament:
+    COMMAND_NOT_STARTED = [
+        '[↓][↑] Navigate',
+        '[a] Add Player',
+        '[p] Player Menu',
+        '[b] Begin Tournament',
+        '[q] Quit'
+    ]
+
     COMMAND_BASE = [
         '[t] Tournament Menu',
         '[p] Player Menu',
@@ -48,6 +56,7 @@ class ViewTournament:
         self.right_wind_width = self.outer_wind_width - self.left_wind_width - 2
         self.bottom_wind_height = self.outer_wind_height - 10
         self.commands = {
+            'command_not_started': self.COMMAND_NOT_STARTED,
             'command_base': self.COMMAND_BASE,
             'command_player': self.COMMAND_PLAYERS,
             'command_tournament': self.COMMAND_TOURNAMENT,
@@ -59,18 +68,33 @@ class ViewTournament:
         self.outer_wind = None
         self.info_wind = None
         self.command_wind = None
-        self.tournament_wind = None
+        self.content_wind = None
         self.player_wind = None
         self.player_pad = None
 
-    def initialize(self, name_score):
-        self.players = name_score
-        self.outer_wind = self.create_outer_wind()
-        self.info_wind = self.create_information_wind()
+    def draw_static_elements(self,
+                             name="{{default_name}}",
+                             place="{{default_place}}",
+                             date_start="{{default_date_start}}",
+                             date_end="{{default_date_end}}",
+                             description="{{default_description}}"):
+        self.outer_wind = self.create_outer_wind(name)
+        self.info_wind = self.create_and_update_information_wind(name, place, date_start, date_end, description)
         self.command_wind = self.create_command_wind()
-        self.tournament_wind = self.create_tournament_wind()
+        self.content_wind = self.create_content_wind()
         self.player_wind = self.create_player_wind()
-        self.player_pad = self.create_player_pad()
+
+    def initialize_unstarted(self, list_available_players, list_participants_score):
+        self.update_command_wind('command_not_started')
+        self.update_player_pad()
+        self.update_content_wind_players()
+        self.update_content_pad_players(list_available_players)
+        self.update_player_pad(list_participants_score)
+
+    def initialize_started(self, list_participants_score):
+        self.players = list_participants_score
+        self.update_command_wind()
+        self.update_player_pad(self.players)
         self.update_player_pad(self.players)
 
     def create_outer_wind(self, title="{{default_title}}"):
@@ -82,12 +106,12 @@ class ViewTournament:
         outer_wind.refresh()
         return outer_wind
 
-    def create_information_wind(self,
-                                name="{{default_name}}",
-                                place="{{default_place}}",
-                                date_start="{{default_date_start}}",
-                                date_end="{{default_date_end}}",
-                                description="{{default_description}}"):
+    def create_and_update_information_wind(self,
+                                           name="{{default_name}}",
+                                           place="{{default_place}}",
+                                           date_start="{{default_date_start}}",
+                                           date_end="{{default_date_end}}",
+                                           description="{{default_description}}"):
         info_wind = self.outer_wind.derwin(8, self.left_wind_width, 1, 1)
         info_wind.box()
         info_wind.addstr(0, 2, ' Information ')
@@ -107,22 +131,53 @@ class ViewTournament:
         info_wind.refresh()
         return info_wind
 
-    def create_command_wind(self, command_key='command_base'):
+    def create_command_wind(self):
         command_wind = self.outer_wind.derwin(8, self.right_wind_width, 1, self.left_wind_width + 1)
         command_wind.clear()
-        command_wind.box()
-        command_wind.addstr(0, 2, ' Commands ')
-        for i in range(len(self.commands[command_key])):
-            command_wind.addstr(i + 1, 2, self.commands[command_key][i])
         command_wind.refresh()
         return command_wind
 
-    def create_tournament_wind(self):
+    def update_command_wind(self, command_key='command_base'):
+        self.command_wind.clear()
+        self.command_wind.box()
+        self.command_wind.addstr(0, 2, ' Commands ')
+        for i in range(len(self.commands[command_key])):
+            self.command_wind.addstr(i + 1, 2, self.commands[command_key][i])
+        self.command_wind.refresh()
+
+    def create_content_wind(self):
         bottom_left_wind = self.outer_wind.derwin(self.bottom_wind_height, self.left_wind_width, 9, 1)
         bottom_left_wind.box()
-        bottom_left_wind.addstr(0, 2, ' Tournament ')
         bottom_left_wind.refresh()
         return bottom_left_wind
+
+    def update_content_wind_players(self):
+        self.content_wind.clear()
+        self.content_wind.box()
+        self.content_wind.addstr(0, 2, ' Available players ')
+        headers = self.reformat_id_player_name({'id': ' #ID',
+                                                'last_name': 'Last Name',
+                                                'first_name': 'First Name'})
+        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.refresh()
+
+    def update_content_pad_players(self, list_dict_id_player):
+        pad_height = len(list_dict_id_player) + 1
+        all_player_pad = curses.newpad(pad_height, self.left_wind_width - 6)
+        for idx, id_player in enumerate(list_dict_id_player):
+            line = self.reformat_id_player_name(id_player)
+            all_player_pad.addstr(idx, 0, line)
+        all_player_pad.refresh(0, 0,
+                               13, 4,
+                               self.outer_wind_height - 3, self.left_wind_width - 3)
+
+    def fill_tournament_list_players(self):
+        # it should create a list of players when the tournament hasn't been started yet
+        pass
+
+    def fill_tournament_rounds(self):
+        # it should create a list of rounds when the tournament has started
+        pass
 
     @staticmethod
     def reformat_name(player_name, target_length):
@@ -141,18 +196,32 @@ class ViewTournament:
         score_string = str(player_name_score['score']).ljust(len('Score'))
         return separator.join([player_string, score_string])
 
-    def create_player_pad(self):
-        pad_height = len(self.players) + 1
-        player_pad = curses.newpad(pad_height, self.right_wind_width - 6)
-        player_pad.refresh(0, 0,
-                           13, self.left_wind_width + 4,
-                           self.outer_wind_height - 3, self.outer_wind_width - 3)
-        return player_pad
+    def reformat_id_player_name(self, id_player_name):
+        separator = ' | '
+        target_length = self.left_wind_width - 6 - len(separator) - len('#000')
+        player_string = self.reformat_name([id_player_name['last_name'], id_player_name['first_name']],
+                                           target_length)
+        id_string = str(id_player_name['id']).rjust(len('#000'))
+        return separator.join([id_string, player_string])
 
-    def update_player_pad(self, list_tuple_player_score):
-        for idx, player_score in enumerate(list_tuple_player_score):
-            line = self.reformat_name_score(player_score)
-            self.player_pad.addstr(idx, 0, line)
+    def reformat_id_round_status(self, id_round_status):
+        pass
+
+    def reformat_id_match_status(self, id_match_status):
+        pass
+
+    def update_player_pad(self, list_tuple_player_score=None):
+        if not list_tuple_player_score:
+            new_pad_height = 1
+        else:
+            new_pad_height = len(list_tuple_player_score) + 1
+        self.player_pad = curses.newpad(new_pad_height, self.right_wind_width - 6)
+
+        if list_tuple_player_score:
+            for idx, player_score in enumerate(list_tuple_player_score):
+                line = self.reformat_name_score(player_score)
+                self.player_pad.addstr(idx, 0, line)
+
         self.player_pad.refresh(0, 0,
                                 13, self.left_wind_width + 4,
                                 self.outer_wind_height - 3, self.outer_wind_width - 3)
@@ -169,6 +238,32 @@ class ViewTournament:
         player_wind.refresh()
         return player_wind
 
+    def start_new_view(self, memory_key=None):
+        while True:
+            if memory_key is not None:
+                key = memory_key
+                memory_key = None
+            else:
+                key = self.outer_wind.getch()
+            if key in [81, 113]:  # 'Q' or 'q'
+                return 'EXIT'
+            elif key == curses.KEY_UP:
+                pass
+            elif key == curses.KEY_DOWN:
+                pass
+            elif key in [65, 97]:  # 'A' or 'a'
+                pass
+            elif key in [80, 112]:  # 'P' or 'p'
+                self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
+                self.player_wind.refresh()
+                self.update_command_wind('command_player')
+                action = self.start_player_menu()
+                self.player_wind.addstr(0, 2, ' Player ')
+                self.player_wind.refresh()
+                self.update_command_wind('command_not_started')
+                if action is not None:
+                    return action
+
     def start_view(self, memory_key=None):
         running = True
         while running:
@@ -178,21 +273,21 @@ class ViewTournament:
             else:
                 key = self.outer_wind.getch()
             if key in [84, 116]:  # 'T'  or 't'
-                self.tournament_wind.addstr(0, 2, ' Tournament ', curses.A_REVERSE)
-                self.tournament_wind.refresh()
-                self.command_wind = self.create_command_wind('command_tournament')
+                self.content_wind.addstr(0, 2, ' Tournament ', curses.A_REVERSE)
+                self.content_wind.refresh()
+                self.update_command_wind('command_tournament')
                 self.outer_wind.getch()
-                self.tournament_wind.addstr(0, 2, ' Tournament ')
-                self.tournament_wind.refresh()
-                self.command_wind = self.create_command_wind()
+                self.content_wind.addstr(0, 2, ' Tournament ')
+                self.content_wind.refresh()
+                self.update_command_wind()
             elif key in [80, 112]:  # 'P' or 'p'
                 self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
                 self.player_wind.refresh()
-                self.command_wind = self.create_command_wind('command_player')
+                self.update_command_wind('command_player')
                 action = self.start_player_menu()
                 self.player_wind.addstr(0, 2, ' Player ')
                 self.player_wind.refresh()
-                self.command_wind = self.create_command_wind()
+                self.update_command_wind()
                 if action is not None:
                     return action
             elif key in [81, 113]:  # 'Q' or 'q'
@@ -206,7 +301,7 @@ class ViewTournament:
                                     self.outer_wind_height - 3, self.outer_wind_width - 3)
             key = self.outer_wind.getch()
             if key == curses.KEY_DOWN:
-                if pad_start_line < len(self.players) - (self.bottom_wind_height - 5):
+                if pad_start_line < self.player_pad.getmaxyx()[0] - (self.bottom_wind_height - 5):
                     pad_start_line += 1
             elif key == curses.KEY_UP:
                 if pad_start_line > 0:
