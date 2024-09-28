@@ -1,4 +1,5 @@
 import curses
+from curses.textpad import Textbox
 
 
 class ViewTournament:
@@ -7,12 +8,6 @@ class ViewTournament:
         '[a] Add Player',
         '[p] Player Menu',
         '[b] Begin Tournament',
-        '[q] Quit'
-    ]
-
-    COMMAND_BASE = [
-        '[t] Tournament Menu',
-        '[p] Player Menu',
         '[q] Quit'
     ]
 
@@ -25,21 +20,24 @@ class ViewTournament:
 
     COMMAND_TOURNAMENT = [
         '[↓][↑] Navigate',
-        '[Enter] Select',
-        '[q] Back to Menu'
+        '[r] Select Round',
+        '[p] Player Menu',
+        '[q] Quit'
     ]
 
     COMMAND_ROUND = [
         '[↓][↑] Navigate',
-        '[Enter] Select',
-        '[q] Back to Tournament'
+        '[m] Select Match',
+        '[c] Round Complete',
+        '[q] Quit'
     ]
 
     COMMAND_MATCH = [
         '[←] Win Left',
         '[→] Win Right',
-        '[=] Draw',
+        '[d] Draw',
         '[r] Reset',
+        '[Enter] Confirm',
         '[q] Quit'
     ]
 
@@ -57,18 +55,20 @@ class ViewTournament:
         self.bottom_wind_height = self.outer_wind_height - 10
         self.commands = {
             'command_not_started': self.COMMAND_NOT_STARTED,
-            'command_base': self.COMMAND_BASE,
             'command_player': self.COMMAND_PLAYERS,
             'command_tournament': self.COMMAND_TOURNAMENT,
             'command_round': self.COMMAND_ROUND,
             'command_match': self.COMMAND_MATCH
         }
 
-        self.players = None
         self.outer_wind = None
         self.info_wind = None
         self.command_wind = None
         self.content_wind = None
+        self.content_pad_players = None
+        self.content_pad_tournament = None
+        self.content_pad_round = None
+        self.match_wind = None
         self.player_wind = None
         self.player_pad = None
 
@@ -79,23 +79,23 @@ class ViewTournament:
                              date_end="{{default_date_end}}",
                              description="{{default_description}}"):
         self.outer_wind = self.create_outer_wind(name)
-        self.info_wind = self.create_and_update_information_wind(name, place, date_start, date_end, description)
+        self.info_wind = self.create_information_wind(name, place, date_start, date_end, description)
         self.command_wind = self.create_command_wind()
         self.content_wind = self.create_content_wind()
-        self.player_wind = self.create_player_wind()
+        self.player_wind = self.create_ranking_wind()
 
     def initialize_unstarted(self, list_available_players, list_participants_score):
         self.update_command_wind('command_not_started')
-        self.update_player_pad()
+        self.update_ranking_pad(list_participants_score)
         self.update_content_wind_players()
         self.update_content_pad_players(list_available_players)
-        self.update_player_pad(list_participants_score)
+        self.update_ranking_pad(list_participants_score)
 
-    def initialize_started(self, list_participants_score):
-        self.players = list_participants_score
+    def initialize_started(self, list_participants_score, list_rounds):
         self.update_command_wind()
-        self.update_player_pad(self.players)
-        self.update_player_pad(self.players)
+        self.update_ranking_pad(list_participants_score)
+        self.update_content_wind_tournament()
+        self.update_content_pad_tournament(list_rounds)
 
     def create_outer_wind(self, title="{{default_title}}"):
         outer_wind = curses.newwin(self.outer_wind_height, self.outer_wind_width, 0, 0)
@@ -106,12 +106,12 @@ class ViewTournament:
         outer_wind.refresh()
         return outer_wind
 
-    def create_and_update_information_wind(self,
-                                           name="{{default_name}}",
-                                           place="{{default_place}}",
-                                           date_start="{{default_date_start}}",
-                                           date_end="{{default_date_end}}",
-                                           description="{{default_description}}"):
+    def create_information_wind(self,
+                                name="{{default_name}}",
+                                place="{{default_place}}",
+                                date_start="{{default_date_start}}",
+                                date_end="{{default_date_end}}",
+                                description="{{default_description}}"):
         info_wind = self.outer_wind.derwin(8, self.left_wind_width, 1, 1)
         info_wind.box()
         info_wind.addstr(0, 2, ' Information ')
@@ -137,7 +137,63 @@ class ViewTournament:
         command_wind.refresh()
         return command_wind
 
-    def update_command_wind(self, command_key='command_base'):
+    def create_ranking_wind(self):
+        ranking_wind = self.outer_wind.derwin(self.bottom_wind_height, self.right_wind_width,
+                                              9, self.left_wind_width + 1)
+        ranking_wind.box()
+        ranking_wind.addstr(0, 2, ' Ranking ')
+        text_menu = self.reformat_name_score({'last_name': 'Last Name',
+                                              'first_name': 'First Name',
+                                              'score': 'Score'})
+        ranking_wind.addstr(2, 3, text_menu)
+        ranking_wind.refresh()
+        return ranking_wind
+
+    def create_content_wind(self):
+        bottom_left_wind = self.outer_wind.derwin(self.bottom_wind_height, self.left_wind_width, 9, 1)
+        bottom_left_wind.box()
+        bottom_left_wind.refresh()
+        return bottom_left_wind
+
+    def create_form_wind(self, form_type):
+        data_map = {
+            'add_player': [' Add Player ', 'ID : '],
+            'select_round': [' Select Round ', 'ID : '],
+            'select_match': [' Select Match ', 'ID : ']
+        }
+        form_add_player_wind = self.content_wind.derwin(3, len(data_map[form_type][0]) + 6,
+                                                        (self.content_wind.getmaxyx()[0] - 3) // 2,
+                                                        (self.content_wind.getmaxyx()[1] - len(data_map[form_type][0])
+                                                         - 6) // 2)
+        form_width = form_add_player_wind.getmaxyx()[1] // 2
+        form_add_player_wind.clear()
+        form_add_player_wind.box()
+        form_add_player_wind.addstr(0, 2, data_map[form_type][0])
+        form_add_player_wind.addstr(1, form_width - len(data_map[form_type][1]), data_map[form_type][1])
+        input_win = form_add_player_wind.derwin(1, 5, 1, form_width)
+        form_add_player_wind.refresh()
+        input_win.refresh()
+        box = Textbox(input_win)
+        curses.curs_set(1)
+        box.edit()
+        curses.curs_set(0)
+        user_input = box.gather().strip()
+        return user_input
+
+    def create_match_wind(self, match_data):
+        content_wind_h, content_wind_w = self.content_wind.getmaxyx()
+        self.match_wind = self.content_wind.derwin(6, content_wind_w - 8,
+                                              (content_wind_h - 6) // 2, 2)
+        self.match_wind.clear()
+        self.match_wind.box()
+        self.match_wind.addstr(0, 2, f" Match n°{match_data['match_id']} ")
+        target_length = self.match_wind.getmaxyx()[1] - 8
+        match_string = self.reformat_name_vs_name(match_data['left'], match_data['right'], target_length)
+        self.match_wind.addstr(2, 3, match_string)
+        self.match_wind.addstr(3, (target_length + 8 - len(match_data['status']))//2, match_data['status'])
+        self.match_wind.refresh()
+
+    def update_command_wind(self, command_key='command_tournament'):
         self.command_wind.clear()
         self.command_wind.box()
         self.command_wind.addstr(0, 2, ' Commands ')
@@ -145,11 +201,21 @@ class ViewTournament:
             self.command_wind.addstr(i + 1, 2, self.commands[command_key][i])
         self.command_wind.refresh()
 
-    def create_content_wind(self):
-        bottom_left_wind = self.outer_wind.derwin(self.bottom_wind_height, self.left_wind_width, 9, 1)
-        bottom_left_wind.box()
-        bottom_left_wind.refresh()
-        return bottom_left_wind
+    def update_ranking_pad(self, list_tuple_player_score=None):
+        if not list_tuple_player_score:
+            new_pad_height = 1
+        else:
+            new_pad_height = len(list_tuple_player_score) + 1
+        self.player_pad = curses.newpad(new_pad_height, self.right_wind_width - 6)
+
+        if list_tuple_player_score:
+            for idx, player_score in enumerate(list_tuple_player_score):
+                line = self.reformat_name_score(player_score)
+                self.player_pad.addstr(idx, 0, line)
+
+        self.player_pad.refresh(0, 0,
+                                13, self.left_wind_width + 4,
+                                self.outer_wind_height - 3, self.outer_wind_width - 3)
 
     def update_content_wind_players(self):
         self.content_wind.clear()
@@ -163,30 +229,75 @@ class ViewTournament:
 
     def update_content_pad_players(self, list_dict_id_player):
         pad_height = len(list_dict_id_player) + 1
-        all_player_pad = curses.newpad(pad_height, self.left_wind_width - 6)
+        self.content_pad_players = curses.newpad(pad_height, self.left_wind_width - 6)
+        self.content_pad_tournament.clear()
         for idx, id_player in enumerate(list_dict_id_player):
             line = self.reformat_id_player_name(id_player)
-            all_player_pad.addstr(idx, 0, line)
-        all_player_pad.refresh(0, 0,
-                               13, 4,
-                               self.outer_wind_height - 3, self.left_wind_width - 3)
+            self.content_pad_players.addstr(idx, 0, line)
+        self.content_pad_players.refresh(0, 0,
+                                         13, 4,
+                                         self.outer_wind_height - 3, self.left_wind_width - 3)
 
-    def fill_tournament_list_players(self):
-        # it should create a list of players when the tournament hasn't been started yet
-        pass
+    def update_content_wind_tournament(self):
+        self.content_wind.clear()
+        self.content_wind.box()
+        self.content_wind.addstr(0, 2, ' Rounds ')
+        headers = self.reformat_id_round_status({'id': ' #ID',
+                                                 'round_name': 'Rounds',
+                                                 'round_status': 'Status'})
+        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.refresh()
 
-    def fill_tournament_rounds(self):
-        # it should create a list of rounds when the tournament has started
-        pass
+    def update_content_pad_tournament(self, list_dict_rounds):
+        pad_height = len(list_dict_rounds) + 1
+        self.content_pad_tournament = curses.newpad(pad_height, self.left_wind_width - 6)
+        self.content_pad_tournament.clear()
+        for idx, id_round_status in enumerate(list_dict_rounds):
+            line = self.reformat_id_round_status(id_round_status)
+            self.content_pad_tournament.addstr(idx, 0, line)
+        self.content_pad_tournament.refresh(0, 0,
+                                            13, 4,
+                                            self.outer_wind_height - 3, self.left_wind_width - 3)
+
+    def update_content_wind_round(self, round_name):
+        self.content_wind.clear()
+        self.content_wind.box()
+        self.content_wind.addstr(0, 2, f" {round_name} ")
+        headers = self.reformat_id_match_status({'id': ' #ID',
+                                                 'left': {'last_name': 'Last name', 'first_name': 'First name'},
+                                                 'right': {'last_name': 'Last name', 'first_name': 'First name'},
+                                                 'match_status': 'Status'})
+        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.refresh()
+
+    def update_content_pad_round(self, round_match_data):
+        pad_height = len(round_match_data) + 1
+        self.content_pad_round = curses.newpad(pad_height, self.left_wind_width - 6)
+        self.content_pad_round.clear()
+        for idx, match_data in enumerate(round_match_data):
+            line = self.reformat_id_match_status(match_data)
+            self.content_pad_round.addstr(idx, 0, line)
+        self.content_pad_tournament.refresh(0, 0,
+                                            13, 4,
+                                            self.outer_wind_height - 3, self.left_wind_width - 3)
 
     @staticmethod
-    def reformat_name(player_name, target_length):
+    def reformat_name(player_name, target_length, direction='left'):
         name = ", ".join(player_name)
         if len(name) < target_length:
-            player_string = name.ljust(target_length)
+            if direction == 'left':
+                return name.ljust(target_length)
+            elif direction == 'right':
+                return name.rjust(target_length)
         else:
-            player_string = name[:target_length - 1] + "."
-        return player_string
+            return name[:target_length - 1] + "."
+
+    @staticmethod
+    def reformat_name_round(round_name, target_length):
+        if len(round_name) < target_length:
+            return round_name.ljust(target_length)
+        else:
+            return round_name[:target_length - 1] + '.'
 
     def reformat_name_score(self, player_name_score):
         separator = ' | '
@@ -205,41 +316,34 @@ class ViewTournament:
         return separator.join([id_string, player_string])
 
     def reformat_id_round_status(self, id_round_status):
-        pass
+        separator = ' | '
+        target_length = self.left_wind_width - 6 - 2 * len(separator) - len('#000') - len('not started')
+        round_string = self.reformat_name_round(id_round_status['round_name'], target_length)
+        id_string = str(id_round_status['id']).rjust(len('#000')) if id_round_status['id'] is not None else 'null'
+        status_string = str(id_round_status['round_status']).ljust(len('not started'))
+        return separator.join([id_string, round_string, status_string])
+
+    def reformat_name_vs_name(self, player_left, player_right, target_length):
+        match_string_left = self.reformat_name([player_left['last_name'], player_left['first_name']],
+                                               target_length // 2, 'right')
+        match_string_right = self.reformat_name([player_right['last_name'], player_right['first_name']],
+                                                target_length // 2)
+        return ' vs '.join([match_string_left, match_string_right])
 
     def reformat_id_match_status(self, id_match_status):
-        pass
-
-    def update_player_pad(self, list_tuple_player_score=None):
-        if not list_tuple_player_score:
-            new_pad_height = 1
-        else:
-            new_pad_height = len(list_tuple_player_score) + 1
-        self.player_pad = curses.newpad(new_pad_height, self.right_wind_width - 6)
-
-        if list_tuple_player_score:
-            for idx, player_score in enumerate(list_tuple_player_score):
-                line = self.reformat_name_score(player_score)
-                self.player_pad.addstr(idx, 0, line)
-
-        self.player_pad.refresh(0, 0,
-                                13, self.left_wind_width + 4,
-                                self.outer_wind_height - 3, self.outer_wind_width - 3)
-
-    def create_player_wind(self):
-        player_wind = self.outer_wind.derwin(self.bottom_wind_height, self.right_wind_width,
-                                             9, self.left_wind_width + 1)
-        player_wind.box()
-        player_wind.addstr(0, 2, ' Player ')
-        text_menu = self.reformat_name_score({'last_name': 'Last Name',
-                                              'first_name': 'First Name',
-                                              'score': 'Score'})
-        player_wind.addstr(2, 3, text_menu)
-        player_wind.refresh()
-        return player_wind
+        separator = ' | '
+        target_length = self.left_wind_width - 6 - 2 * len(separator) - len('#000') - len('pending...') - len(" vs ")
+        match_string = self.reformat_name_vs_name(id_match_status['left'], id_match_status['right'], target_length)
+        id_string = str(id_match_status['id']).rjust(len('#000'))
+        status_string = str(id_match_status['match_status']).ljust(len('pending...'))
+        return separator.join([id_string, match_string, status_string])
 
     def start_new_view(self, memory_key=None):
+        pad_start_line = 0
         while True:
+            self.content_pad_players.refresh(pad_start_line, 0,
+                                             13, 4,
+                                             self.outer_wind_height - 3, self.left_wind_width - 3)
             if memory_key is not None:
                 key = memory_key
                 memory_key = None
@@ -247,53 +351,60 @@ class ViewTournament:
                 key = self.outer_wind.getch()
             if key in [81, 113]:  # 'Q' or 'q'
                 return 'EXIT'
-            elif key == curses.KEY_UP:
-                pass
             elif key == curses.KEY_DOWN:
-                pass
+                if pad_start_line < self.content_pad_players.getmaxyx()[0] - (self.bottom_wind_height - 5):
+                    pad_start_line += 1
+            elif key == curses.KEY_UP:
+                if pad_start_line > 0:
+                    pad_start_line -= 1
             elif key in [65, 97]:  # 'A' or 'a'
-                pass
+                action = self.create_form_wind('add_player')
+                if action is not None or '':
+                    return 'ADD_PLAYER', action
+            elif key in [66, 98]:  # 'B' or 'b'
+                return 'START_TOURNAMENT'
             elif key in [80, 112]:  # 'P' or 'p'
-                self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
-                self.player_wind.refresh()
-                self.update_command_wind('command_player')
-                action = self.start_player_menu()
+                action = self.start_ranking_menu()
                 self.player_wind.addstr(0, 2, ' Player ')
                 self.player_wind.refresh()
                 self.update_command_wind('command_not_started')
                 if action is not None:
                     return action
 
-    def start_view(self, memory_key=None):
-        running = True
-        while running:
-            if memory_key is not None:
-                key = memory_key
-                memory_key = None
-            else:
-                key = self.outer_wind.getch()
-            if key in [84, 116]:  # 'T'  or 't'
-                self.content_wind.addstr(0, 2, ' Tournament ', curses.A_REVERSE)
-                self.content_wind.refresh()
-                self.update_command_wind('command_tournament')
-                self.outer_wind.getch()
-                self.content_wind.addstr(0, 2, ' Tournament ')
-                self.content_wind.refresh()
-                self.update_command_wind()
+    def start_view(self):
+        pad_start_line = 0
+        while True:
+            self.update_command_wind('command_tournament')
+            self.update_content_wind_tournament()
+            self.content_pad_tournament.refresh(pad_start_line, 0,
+                                                13, 4,
+                                                self.outer_wind_height - 3, self.left_wind_width - 3)
+            key = self.outer_wind.getch()
+
+            if key in [81, 113]:  # 'Q' or 'q'
+                return 'EXIT'
+            elif key == curses.KEY_DOWN:
+                if pad_start_line < self.content_pad_tournament.getmaxyx()[0] - (self.bottom_wind_height - 5):
+                    pad_start_line += 1
+            elif key == curses.KEY_UP:
+                if pad_start_line > 0:
+                    pad_start_line -= 1
             elif key in [80, 112]:  # 'P' or 'p'
-                self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
-                self.player_wind.refresh()
-                self.update_command_wind('command_player')
-                action = self.start_player_menu()
+                action = self.start_ranking_menu()
                 self.player_wind.addstr(0, 2, ' Player ')
                 self.player_wind.refresh()
                 self.update_command_wind()
                 if action is not None:
                     return action
-            elif key in [81, 113]:  # 'Q' or 'q'
-                return 'EXIT'
+            elif key in [82, 114]:  # 'R' or 'r'
+                action = self.create_form_wind('select_round')
+                if action:
+                    return 'SELECT_ROUND', action
 
-    def start_player_menu(self):
+    def start_ranking_menu(self):
+        self.player_wind.addstr(0, 2, ' Player ', curses.A_REVERSE)
+        self.player_wind.refresh()
+        self.update_command_wind('command_player')
         pad_start_line = 0
         while True:
             self.player_pad.refresh(pad_start_line, 0,
@@ -313,38 +424,62 @@ class ViewTournament:
             elif key in [80, 112]:  # 'P' or 'p'
                 return 'SORT', self.SORT_FIELDS[0], False
 
-    @staticmethod
-    def get_header_index(header_string):
-        parts = header_string.split('|')
-        idx_name = 0
-        idx_score = 2 + len(parts[0])
-        return idx_name, idx_score
+    def start_round_view(self, round_data):
+        pad_start_line = 0
+        while True:
+            self.update_content_wind_round(round_data['round_name'])
+            self.update_content_pad_round(round_data['matches'])
+            self.update_command_wind('command_round')
+            self.content_pad_round.refresh(pad_start_line, 0,
+                                           13, 4,
+                                           self.outer_wind_height - 3, self.left_wind_width - 3)
+            key = self.outer_wind.getch()
+            if key in [81, 113]:  # 'Q' or 'q'
+                return 'EXIT'
+            elif key == curses.KEY_DOWN:
+                if pad_start_line < self.content_pad_round.getmaxyx()[0] - (self.bottom_wind_height - 5):
+                    pad_start_line += 1
+            elif key == curses.KEY_UP:
+                if pad_start_line > 0:
+                    pad_start_line -= 1
+            elif key in [77, 109]:  # 'M' or 'm'
+                action = self.create_form_wind('select_match')
+                if action is not None and action != '':
+                    return 'SELECT_MATCH', action
+                self.update_content_wind_round(round_data['round_name'])
+            elif key in [67, 99]:  # 'C' or 'c'
+                return 'ROUND_COMPLETE'
 
-    def start_sort_menu(self):
-        current_line_index = 0
-        header_string = self.reformat_name_score(('Last Name', 'First Name', 'Score'))
-        indexes_values = self.get_header_index(header_string)
-        strings_menu = header_string.split(' | ')
-        indexes = {i: (indexes_values[i], strings_menu[i]) for i in range(len(indexes_values))}
-
-        running = True
-
-        while running:
-            self.player_wind.addstr(2, 3, header_string)
-            self.player_wind.addstr(2, 3 + indexes[current_line_index][0], indexes[current_line_index][1],
-                                    curses.A_REVERSE)
-            self.player_wind.refresh()
-
-            key = self.player_wind.getch()
-            if key == curses.KEY_RIGHT:
-                current_line_index = (current_line_index + 1) % len(indexes)
+    def start_match_view(self, match_data):
+        display_answer = [
+            'Win left  ',
+            'Win right  ',
+            'Draw      ',
+            'Pending...'
+        ]
+        result = None
+        self.create_match_wind(match_data)
+        self.update_command_wind('command_match')
+        target_length = self.match_wind.getmaxyx()[1]
+        while True:
+            self.match_wind.refresh()
+            key = self.outer_wind.getch()
+            if key in [81, 113]:    # 'Q' or 'q'
+                return 'EXIT'
             elif key == curses.KEY_LEFT:
-                current_line_index = (current_line_index - 1) % len(indexes)
-            elif key == curses.KEY_ENTER or key in [10, 13]:
-                if current_line_index == 0:
-                    return 'SORT', 'NAME'
-                elif current_line_index == 1:
-                    return 'SORT', 'SCORE'
+                result = 'MATCH_RESULT', 'WIN_LEFT'
+                self.match_wind.addstr(3, (target_length - len(display_answer[0]))//2, display_answer[0])
+            elif key == curses.KEY_RIGHT:
+                result = 'MATCH_RESULT', 'WIN_RIGHT'
+                self.match_wind.addstr(3, (target_length - len(display_answer[0]))//2, display_answer[1])
+            elif key in [68, 100]:  # 'D' or 'd'
+                result = 'MATCH_RESULT', 'DRAW'
+                self.match_wind.addstr(3, (target_length - len(display_answer[0]))//2, display_answer[2])
+            elif key in [82, 114]:  # 'R' or 'r'
+                result = 'MATCH_RESULT', 'RESET'
+                self.match_wind.addstr(3, (target_length - len(display_answer[0]))//2, display_answer[3])
+            elif key in [10, 13]:  # Enter key to confirm
+                return result
 
 
 def main(stdscr):
