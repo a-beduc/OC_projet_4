@@ -15,10 +15,10 @@ class Match(_BaseModel):
         :param save_to_db: if true, save the instance in the database
         """
         super().__init__()
-        players = sorted([player_1_software_id, player_2_software_id])
+        self.players = sorted([player_1_software_id, player_2_software_id])
         self.score: Dict[str, float] = {
-            players[0]: 0,
-            players[1]: 0
+            self.players[0]: 0.0,
+            self.players[1]: 0.0
         }
         self.is_finished: bool = False
         if save_to_db:

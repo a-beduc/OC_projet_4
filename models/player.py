@@ -67,15 +67,15 @@ def main():
     """
     x = Player.get_data()['players']
     print(x)
-    new_player = Player(first_name="Magnus", last_name="Carlsen",
-                        date_of_birth="1990-11-30", chess_id="AA00000")
-    print(repr(new_player))
-    new_player.save_to_database()
-    jean = Player.from_json(software_id="p_1")
-    print(jean)
-    print(jean.software_id)
-    # could be used to create dynamic pathing with inheritance
-    print(Player.__name__.lower())
+    # new_player = Player(first_name="Magnus", last_name="Carlsen",
+    #                     date_of_birth="1990-11-30", chess_id="AA00000")
+    # print(repr(new_player))
+    # new_player.save_to_database()
+    # jean = Player.from_json(software_id="p_1")
+    # print(jean)
+    # print(jean.software_id)
+    # # could be used to create dynamic pathing with inheritance
+    # print(Player.__name__.lower())
 
 
 if __name__ == '__main__':
