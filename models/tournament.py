@@ -164,11 +164,12 @@ class Tournament(_BaseModel):
         """
         Add a participant to the tournament and set his/her score to 0
         """
-        if player_id not in self.participants.keys():
-            self.participants[player_id] = (Player.from_json(player_id), 0)
-            self.save_to_database()
-        else:
-            print(f"Player : {repr(player_software_id)} is already registered")
+        try:
+            if player_id not in self.participants.keys():
+                self.participants[player_id] = (Player.from_json(player_id), 0.0)
+                self.save_to_database()
+        except NameError as ne:
+            raise ne
 
     def initialize_first_round(self):
         """
@@ -182,23 +183,26 @@ class Tournament(_BaseModel):
         self.rounds["Round_1"] = Round(f"Round_1", match_pairs)
         self.save_to_database()
 
-    def end_round(self, round_key: str):
+    def complete_round(self, round_key: str):
         """
         End a round and update participants' scores.
         :param round_key: ex : 'Round_1'; it can also be called with method self.check_current_round()
         """
         current_round = self.check_current_round()
-        if round_key == current_round and self.rounds[round_key] != None:
-            self.rounds[round_key].end_round()
-            for match in self.rounds[round_key].matches:
-                for player_id, value in match.score.items():
-                    self.participants[player_id] = (self.participants[player_id][0], self.participants[player_id][1] + value)
-            self.save_to_database()
-
-            if all(rounds is not None and rounds.is_finished for rounds in self.rounds.values()):
-                self.complete = True
+        if round_key == current_round and self.rounds[round_key] is not None:
+            try:
+                self.rounds[round_key].end_round()
+                for match in self.rounds[round_key].matches:
+                    for player_id, value in match.score.items():
+                        self.participants[player_id] = (self.participants[player_id][0], self.participants[player_id][1] + value)
                 self.save_to_database()
 
+                if all(rounds is not None and rounds.is_finished for rounds in self.rounds.values()):
+                    self.complete = True
+                    self.save_to_database()
+
+            except ValueError as ve:
+                raise ve
 
     def check_current_round(self):
         """

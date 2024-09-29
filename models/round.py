@@ -87,8 +87,7 @@ class Round(_BaseModel):
         if not self.is_finished:
             for match in self.matches:
                 if not match.is_finished:
-                    print(f"Match with ID : {match.software_id} is not finished")
-                    return
+                    raise ValueError(f"Match with ID : {match.software_id} is not finished")
             self.time_end = str(datetime.now())
             self.is_finished = True
             self.save_to_database()
