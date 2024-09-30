@@ -267,13 +267,3 @@ class Tournament(_BaseModel):
                 f"Classement : {self.get_ranking()}\n"
                 f"Liste des participants : {self.participants}\n"
                 f"Liste des rounds : {self.rounds}\n")
-
-
-def main():
-    tournament_2 = Tournament.from_json('t_1')
-    print(repr(tournament_2))
-
-
-
-if __name__ == "__main__":
-    main()

@@ -115,31 +115,3 @@ class Round(_BaseModel):
     def __repr__(self) -> str:
         return (f"Round : {self.name}, Matches: {[match.software_id for match in self.matches]}, "
                 f"Started: {self.time_start}, Ended: {self.time_end}")
-
-
-def main():
-    """
-    Temporary function to test methods and objects
-    :return:
-    """
-
-    # round_1 = Round("Round x", matches_pairs={('p_3', 'p_5'), ('p_1', 'p_4')})
-    # print(round_1)
-    # print(round_1.matches[0].is_finished)
-    # print(round_1.matches[1].is_finished)
-    # value = input("just to delay exec")
-    # print(value)
-    # round_1.end_round()
-    # round_1.save_to_database()
-
-    round_2 = Round.from_json("r_1")
-    print(round_2.get_match_by_player_id('p_1'))
-    match_p = round_2.get_match_by_player_id('p_1')
-    match_p.draw()
-    print(round_2.matches[0].is_finished)
-    print(round_2.matches[1].is_finished)
-    round_2.check_match_result()
-
-
-if __name__ == '__main__':
-    main()

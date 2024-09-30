@@ -118,26 +118,3 @@ class Match(_BaseModel):
         else:
             return (f"ID Match : {self.software_id} is not finished ; "
                     f"Result pending: {list(self.score.keys())[0]} vs {list(self.score.keys())[1]}.")
-
-
-def main():
-    """
-    Temporary function to test methods and objects
-    :return:
-    """
-    match = Match.get_data()
-    print(match)
-
-    match_1 = Match("p_9", "p_2")
-    print(repr(match_1))
-    print(match_1.score)
-    print(match_1.software_id)
-    match_1.save_to_database()
-    match_3 = Match.from_json("m_2")
-    print(match_3.score)
-    print(match_3.is_finished)
-    print(repr(match_3))
-
-
-if __name__ == '__main__':
-    main()
