@@ -104,7 +104,7 @@ class ViewTournament:
         self.update_content_pad_tournament(list_rounds)
 
     def create_outer_wind(self, title="{{default_title}}"):
-        outer_wind = curses.newwin(self.outer_wind_height, self.outer_wind_width, 0, 0)
+        outer_wind = curses.newwin(self.outer_wind_height, self.outer_wind_width, 0, 1)
         outer_wind.box()
         box_title = f" {title} "
         outer_wind.addstr(0, (self.outer_wind_width - len(box_title)) // 2, box_title)
@@ -151,7 +151,7 @@ class ViewTournament:
         text_menu = self.reformat_name_score({'last_name': 'Last Name',
                                               'first_name': 'First Name',
                                               'score': 'Score'})
-        ranking_wind.addstr(2, 3, text_menu)
+        ranking_wind.addstr(2, 2, text_menu)
         ranking_wind.refresh()
         return ranking_wind
 
@@ -230,7 +230,7 @@ class ViewTournament:
         headers = self.reformat_id_player_name({'id': ' #ID',
                                                 'last_name': 'Last Name',
                                                 'first_name': 'First Name'})
-        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.addstr(2, 2, headers)
         self.content_wind.refresh()
 
     def update_content_pad_players(self, list_dict_id_player):
@@ -252,7 +252,7 @@ class ViewTournament:
         headers = self.reformat_id_round_status({'id': ' #ID',
                                                  'round_name': 'Rounds',
                                                  'round_status': 'Status'})
-        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.addstr(2, 2, headers)
         self.content_wind.refresh()
 
     def update_content_pad_tournament(self, list_dict_rounds):
@@ -274,7 +274,7 @@ class ViewTournament:
                                                  'left': {'last_name': 'Last name', 'first_name': 'First name'},
                                                  'right': {'last_name': 'Last name', 'first_name': 'First name'},
                                                  'match_status': 'Status'})
-        self.content_wind.addstr(2, 3, headers)
+        self.content_wind.addstr(2, 2, headers)
         self.content_wind.refresh()
 
     def update_content_pad_round(self, round_match_data):
