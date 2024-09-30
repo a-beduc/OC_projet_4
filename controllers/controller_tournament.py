@@ -46,13 +46,13 @@ class ControllerTournament:
             elif 'ADD_PLAYER' in action:
                 try:
                     int(action[1])
-                except ValueError:
+                    player_id = f"p_{action[1]}"
+                    self.tournament.add_participant(player_id)
+                    self.name_score = self.sort_key(self.reformat_name_score(), ['last_name', 'first_name'], False)
+                    self.view_tournament.update_content_pad_players(self.reformat_id_name())
+                    self.view_tournament.update_ranking_pad(self.name_score)
+                except (ValueError, KeyError, NameError):
                     continue
-                player_id = f"p_{action[1]}"
-                self.tournament.add_participant(player_id)
-                self.name_score = self.sort_key(self.reformat_name_score(), ['last_name', 'first_name'], False)
-                self.view_tournament.update_content_pad_players(self.reformat_id_name())
-                self.view_tournament.update_ranking_pad(self.name_score)
             elif 'SORT' in action:
                 self.name_score = self.sort_key(self.reformat_name_score(), action[1], action[2])
                 self.view_tournament.update_ranking_pad(self.name_score)
@@ -79,11 +79,13 @@ class ControllerTournament:
                 if selected_round is None:
                     continue
                 self.start_round(selected_round)
+                self.name_score = self.sort_key(self.reformat_name_score(), ['score', 'last_name', 'first_name'])
+                self.view_tournament.initialize_started(self.name_score, self.reformat_round_status())
 
     def start_round(self, selected_round):
         round_data = self.prepare_round(selected_round)
         while True:
-            action = self.view_tournament.start_round_view(round_data)
+            action = self.view_tournament.start_round_view(round_data, selected_round.is_finished)
             if action == 'EXIT':
                 break
             elif 'SELECT_MATCH' in action:
@@ -92,8 +94,16 @@ class ControllerTournament:
                 if selected_match is None:
                     continue
                 self.start_match(selected_match)
+                round_data = self.prepare_round(selected_round)
             elif 'ROUND_COMPLETE' in action:
-                break
+                try:
+                    self.tournament.complete_round(selected_round.name)
+                    self.tournament.start_next_round()
+                    break
+                except ValueError:
+                    continue
+                except KeyError:
+                    break
 
     def start_match(self, selected_match):
         match_data = self.prepare_match(selected_match)
@@ -105,17 +115,16 @@ class ControllerTournament:
                 self.update_match_result(selected_match, action[1])
                 break
 
-# TO DO HERE TO DO HERE
-
-    def update_match_result(self, match_obj, result):
+    @staticmethod
+    def update_match_result(match_obj, result):
         if result == 'WIN_LEFT':
-            pass
+            match_obj.id_win(match_obj.players[0])
         elif result == 'WIN_RIGHT':
-            pass
+            match_obj.id_win(match_obj.players[1])
         elif result == 'DRAW':
-            pass
+            match_obj.draw()
         elif result == 'RESET':
-            pass
+            match_obj.reset_match_result()
 
     def check_match_id(self, match_id, current_round_key):
         for match in self.tournament.rounds[current_round_key].matches:

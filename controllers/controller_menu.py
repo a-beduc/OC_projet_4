@@ -47,6 +47,5 @@ class ControllerMenu:
             elif 'LOAD_TOURNAMENT' in action:
                 self.tournament = ControllerTournament(self.stdscr, action[1])
                 self.tournament.start()
-                break
 
         print(action)

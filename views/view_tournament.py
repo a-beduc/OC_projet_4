@@ -28,7 +28,12 @@ class ViewTournament:
     COMMAND_ROUND = [
         '[↓][↑] Navigate',
         '[m] Select Match',
-        '[c] Round Complete',
+        '[c] Complete Round',
+        '[q] Quit'
+    ]
+
+    COMMAND_FINISHED_ROUND = [
+        '[↓][↑] Navigate',
         '[q] Quit'
     ]
 
@@ -58,6 +63,7 @@ class ViewTournament:
             'command_player': self.COMMAND_PLAYERS,
             'command_tournament': self.COMMAND_TOURNAMENT,
             'command_round': self.COMMAND_ROUND,
+            'command_finished_round': self.COMMAND_FINISHED_ROUND,
             'command_match': self.COMMAND_MATCH
         }
 
@@ -230,7 +236,8 @@ class ViewTournament:
     def update_content_pad_players(self, list_dict_id_player):
         pad_height = len(list_dict_id_player) + 1
         self.content_pad_players = curses.newpad(pad_height, self.left_wind_width - 6)
-        self.content_pad_tournament.clear()
+        if self.content_pad_tournament:
+            self.content_pad_tournament.clear()
         for idx, id_player in enumerate(list_dict_id_player):
             line = self.reformat_id_player_name(id_player)
             self.content_pad_players.addstr(idx, 0, line)
@@ -424,12 +431,15 @@ class ViewTournament:
             elif key in [80, 112]:  # 'P' or 'p'
                 return 'SORT', self.SORT_FIELDS[0], False
 
-    def start_round_view(self, round_data):
+    def start_round_view(self, round_data, is_finished=False):
         pad_start_line = 0
         while True:
-            self.update_content_wind_round(round_data['round_name'])
             self.update_content_pad_round(round_data['matches'])
-            self.update_command_wind('command_round')
+            self.update_content_wind_round(round_data['round_name'])
+            if not is_finished:
+                self.update_command_wind('command_round')
+            else:
+                self.update_command_wind('command_finished_round')
             self.content_pad_round.refresh(pad_start_line, 0,
                                            13, 4,
                                            self.outer_wind_height - 3, self.left_wind_width - 3)
@@ -442,12 +452,12 @@ class ViewTournament:
             elif key == curses.KEY_UP:
                 if pad_start_line > 0:
                     pad_start_line -= 1
-            elif key in [77, 109]:  # 'M' or 'm'
+            elif key in [77, 109] and not is_finished:  # 'M' or 'm'
                 action = self.create_form_wind('select_match')
                 if action is not None and action != '':
                     return 'SELECT_MATCH', action
                 self.update_content_wind_round(round_data['round_name'])
-            elif key in [67, 99]:  # 'C' or 'c'
+            elif key in [67, 99] and not is_finished:  # 'C' or 'c'
                 return 'ROUND_COMPLETE'
 
     def start_match_view(self, match_data):
