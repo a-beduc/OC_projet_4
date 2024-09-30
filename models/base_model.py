@@ -49,9 +49,14 @@ class _BaseModel(ABC):
         :param software_id: str: '<class_first_letter>_<number>'
         :return instance: an instance of a class
         """
-        data = cls.get_data()
-        item_data = data[cls.class_name_plural()][software_id]
-        return cls._create_instance_from_json(item_data, software_id, save_to_db=False)
+        try:
+            data = cls.get_data()
+            if software_id not in data[cls.class_name_plural()]:
+                raise KeyError
+            item_data = data[cls.class_name_plural()][software_id]
+            return cls._create_instance_from_json(item_data, software_id, save_to_db=False)
+        except KeyError as ke:
+            raise ke
 
     @classmethod
     @abstractmethod

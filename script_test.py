@@ -39,7 +39,7 @@ def main():
                 else:
                     print("Entrée invalide. Veuillez réessayer.")
 
-        new_tournament.end_round(round_key)
+        new_tournament.complete_round(round_key)
 
         if new_tournament.complete:
             print("Tournoi terminé")
