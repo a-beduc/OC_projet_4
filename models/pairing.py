@@ -170,26 +170,3 @@ class Pairing:
         instance.possibles_configurations = [config for config in instance.possibles_configurations
                                              if not config & instance.played_matches]
         return instance
-
-
-def main():
-    lists = ["p_7", "p_8", "p_9", "p_10", "p_11", "p_12"]
-    paired = Pairing(lists)
-    print("Configurations possibles :")
-    for config in paired.possibles_configurations:
-        print(config)
-    print("------------------")
-    x = paired.generate_first_round_configuration()
-    print(f"Premier tour : {x}")
-    print(f"Configurations restantes : {paired.possibles_configurations}")
-    print(f"Matchs joués : {paired.played_matches}")
-    print("-----------------")
-    y = paired.try_to_generate_next_round(['p_7', 'p_11', 'p_12'])
-    print(f"Tour suivant : {y}")
-    print(f"Configurations restantes : {paired.possibles_configurations}")
-    print(f"Matchs joués : {paired.played_matches}")
-    print("-----------------")
-
-
-if __name__ == "__main__":
-    main()

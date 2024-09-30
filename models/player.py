@@ -58,25 +58,3 @@ class Player(_BaseModel):
 
     def __repr__(self) -> str:
         return f'software_id : {self.software_id}, {self.last_name} {self.first_name} : {self.chess_id}'
-
-
-def main():
-    """
-    Temporary function to test methods and objects
-    :return:
-    """
-    x = Player.get_data()['players']
-    print(x)
-    # new_player = Player(first_name="Magnus", last_name="Carlsen",
-    #                     date_of_birth="1990-11-30", chess_id="AA00000")
-    # print(repr(new_player))
-    # new_player.save_to_database()
-    # jean = Player.from_json(software_id="p_1")
-    # print(jean)
-    # print(jean.software_id)
-    # # could be used to create dynamic pathing with inheritance
-    # print(Player.__name__.lower())
-
-
-if __name__ == '__main__':
-    main()
