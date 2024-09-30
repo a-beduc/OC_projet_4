@@ -15,7 +15,7 @@ class Match(_BaseModel):
         :param save_to_db: if true, save the instance in the database
         """
         super().__init__()
-        self.players = sorted([player_1_software_id, player_2_software_id])
+        self.players = sorted([player_1_software_id, player_2_software_id], key=lambda x: int(x.split('_')[1]))
         self.score: Dict[str, float] = {
             self.players[0]: 0.0,
             self.players[1]: 0.0
@@ -44,15 +44,15 @@ class Match(_BaseModel):
         del item_data['complete']
         match_data = list(item_data.items())
 
-        player_1_software_id, score_player_1 = match_data[0]
-        player_2_software_id, score_player_2 = match_data[1]
+        player_scores = {player_id: score for player_id, score in match_data}
+        sorted_players = sorted(player_scores.keys(), key=lambda x: int(x.split('_')[1]))
 
-        instance = cls(player_1_software_id=player_1_software_id,
-                       player_2_software_id=player_2_software_id,
+        instance = cls(player_1_software_id=sorted_players[0],
+                       player_2_software_id=sorted_players[1],
                        save_to_db=False)
         instance.software_id = match_id
-        instance.score[player_1_software_id] = score_player_1
-        instance.score[player_2_software_id] = score_player_2
+        instance.score[sorted_players[0]] = player_scores[sorted_players[0]]
+        instance.score[sorted_players[1]] = player_scores[sorted_players[1]]
         instance.is_finished = is_finished
 
         return instance

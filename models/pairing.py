@@ -27,6 +27,11 @@ class Pairing:
         self.played_matches: Set[Tuple[str, str]] = set()
         if new_pairing:
             self.initial_configuration = self.randomize_players()
+            self.generate_circle_configurations()
+
+    @staticmethod
+    def get_player_number(player_id):
+        return int(player_id.split('_')[1])
 
     def randomize_players(self) -> Tuple[str, ...]:
         shuffled_list = self.list_of_players.copy()
@@ -45,8 +50,7 @@ class Pairing:
         new_list.extend(old_list[1:-1])
         return new_list
 
-    @staticmethod
-    def generate_pairing(list_configuration: List[str]) -> Set[Tuple[str, str]]:
+    def generate_pairing(self, list_configuration: List[str]) -> Set[Tuple[str, str]]:
         """
         Generate every configuration possible when doing a full circle from the initial position.
         From a list [1, 5, 3, 4, 2, 6]
@@ -59,8 +63,8 @@ class Pairing:
         set_configuration = set()
         for i in range(int(len(list_configuration) / 2)):
             pair = [list_configuration[i], list_configuration[-i-1]]
-            pair = sorted(pair)
-            set_configuration.add(tuple(pair))
+            pair = tuple(sorted(pair, key=self.get_player_number))
+            set_configuration.add(pair)
         return set_configuration
 
     def generate_circle_configurations(self):
@@ -119,7 +123,7 @@ class Pairing:
         for i in range(len(list_of_players)):
             for j in range(i+1, len(list_of_players)):
                 match_test = [list_of_players[i], list_of_players[j]]
-                match_test = tuple(sorted(match_test))
+                match_test = tuple(sorted(match_test, key=self.get_player_number))
                 if match_test not in self.played_matches:
                     next_round = self.generate_round_configuration_from_match(match_test)
                     return next_round
@@ -134,20 +138,13 @@ class Pairing:
 
         this method will always try to look for matches that haven't been played yet.
         """
-        ranking_key = []
-        for key in dict_ranking.keys():
-            ranking_key.append(key)
-        sorted(ranking_key)
-        i = 0
-        starting_list = dict_ranking[ranking_key[0]]
+        ranking_key = sorted(dict_ranking.keys(), key=int)
+        accumulated_list = []
         result = None
-        while not result:
-            list_test = starting_list.copy()
-            next_list = []
-            if i > 0:
-                next_list.extend(dict_ranking[ranking_key[i]])
-            list_test.extend(next_list)
-            result = self.try_to_generate_next_round(list_test)
+        i = 0
+        while i < len(ranking_key) and not result:
+            accumulated_list.extend(dict_ranking[ranking_key[i]])
+            result = self.try_to_generate_next_round(accumulated_list)
             i += 1
         return result
 
@@ -176,36 +173,21 @@ class Pairing:
 
 
 def main():
-    lists = ["p_1", "p_2", "p_3", "p_4", "p_5", "p_6"]
+    lists = ["p_7", "p_8", "p_9", "p_10", "p_11", "p_12"]
     paired = Pairing(lists)
-    paired.generate_circle_configurations()
-    print(paired.possibles_configurations)
-    print(paired.initial_configuration)
+    print("Configurations possibles :")
+    for config in paired.possibles_configurations:
+        print(config)
     print("------------------")
     x = paired.generate_first_round_configuration()
-    print("------------------")
-    print(f"current round : {x}")
-    print(f"reste configuration : {paired.possibles_configurations}")
-    print(f"Match joué : {paired.played_matches}")
-    print(paired.initial_configuration)
+    print(f"Premier tour : {x}")
+    print(f"Configurations restantes : {paired.possibles_configurations}")
+    print(f"Matchs joués : {paired.played_matches}")
     print("-----------------")
-    y = paired.try_to_generate_next_round(['p_2', 'p_3', 'p_4'])
-    print(f"current round : {y}")
-    print(f"reste configuration : {paired.possibles_configurations}")
-    print(f"Match joué : {paired.played_matches}")
-    print(paired.initial_configuration)
-    print("-----------------")
-    y = paired.try_to_generate_next_round(['p_2', 'p_3', 'p_4'])
-    print(f"current round : {y}")
-    print(f"reste configuration : {paired.possibles_configurations}")
-    print(f"Match joué : {paired.played_matches}")
-    print(paired.initial_configuration)
-    print("-----------------")
-    y = paired.try_to_generate_next_round(['p_2'])
-    print(f"current round : {y}")
-    print(f"reste configuration : {paired.possibles_configurations}")
-    print(f"Match joué : {paired.played_matches}")
-    print(paired.initial_configuration)
+    y = paired.try_to_generate_next_round(['p_7', 'p_11', 'p_12'])
+    print(f"Tour suivant : {y}")
+    print(f"Configurations restantes : {paired.possibles_configurations}")
+    print(f"Matchs joués : {paired.played_matches}")
     print("-----------------")
 
 
