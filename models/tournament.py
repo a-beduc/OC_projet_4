@@ -229,15 +229,18 @@ class Tournament(_BaseModel):
             1 - Try to match the players with the highest scores on against the others.
             2 - Avoid the repetition of a past match.
         """
-        current_round = self.check_current_round()
-        if self.rounds[current_round] is not None:
-            print(f"current round : {current_round} is not finished.")
-            return
+        try:
+            current_round = self.check_current_round()
+            if self.rounds[current_round] is not None:
+                print(f"current round : {current_round} is not finished.")
+                return
 
-        ranking = self.get_ranking()
-        next_pairing = self.pairing.generate_next_round_from_ranking(ranking)
-        self.rounds[current_round] = Round(name=current_round, matches_pairs=next_pairing)
-        self.save_to_database()
+            ranking = self.get_ranking()
+            next_pairing = self.pairing.generate_next_round_from_ranking(ranking)
+            self.rounds[current_round] = Round(name=current_round, matches_pairs=next_pairing)
+            self.save_to_database()
+        except KeyError as ke:
+            raise ke
 
     def get_ranking(self):
         """
