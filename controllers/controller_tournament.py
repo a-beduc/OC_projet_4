@@ -109,11 +109,14 @@ class ControllerTournament:
         match_data = self.prepare_match(selected_match)
         while True:
             action = self.view_tournament.start_match_view(match_data)
-            if action == 'EXIT':
-                break
-            elif 'MATCH_RESULT' in action:
-                self.update_match_result(selected_match, action[1])
-                break
+            try:
+                if action == 'EXIT':
+                    break
+                elif 'MATCH_RESULT' in action:
+                    self.update_match_result(selected_match, action[1])
+                    break
+            except TypeError:
+                continue
 
     @staticmethod
     def update_match_result(match_obj, result):
