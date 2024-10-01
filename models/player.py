@@ -26,7 +26,10 @@ class Player(_BaseModel):
             self.save_to_database()
 
     @classmethod
-    def _create_instance_from_json(cls, item_data: Dict[str, str], player_id: str, save_to_db: bool = False):
+    def _create_instance_from_json(cls,
+                                   item_data: Dict[str, str],
+                                   player_id: str,
+                                   save_to_db: bool = False):
         """
         Create a player object from a json dictionary.
         :param item_data: The dictionary extracted from the tournament.json
@@ -55,6 +58,3 @@ class Player(_BaseModel):
             "date_of_birth": self.date_of_birth,
             "chess_id": self.chess_id}
         return data
-
-    def __repr__(self) -> str:
-        return f'software_id : {self.software_id}, {self.last_name} {self.first_name} : {self.chess_id}'

@@ -1,14 +1,10 @@
 from datetime import datetime
 from models.base_model import _BaseModel
 from models.match import Match
-from typing import Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 
 
 class Round(_BaseModel):
-    """
-    2024/09/14 : It appears that Round or round is a name used for a built-in function, the name of the class might need
-    to be changed
-    """
     def __init__(self,
                  name: str,
                  matches_pairs: Optional[Set[Tuple[str, str]]] = None,
@@ -36,7 +32,7 @@ class Round(_BaseModel):
 
     @classmethod
     def _create_instance_from_json(cls,
-                                   item_data: dict[str, object],
+                                   item_data: Dict[str, object],
                                    round_id: str,
                                    save_to_db: bool = False):
         """
@@ -75,9 +71,7 @@ class Round(_BaseModel):
         Create Match Instance from pairs of players.
         :return:
         """
-        for pair in self.matches_pairs:
-            match = Match(pair[0], pair[1])
-            self.matches.append(match)
+        self.matches.extend([Match(pair[0], pair[1]) for pair in self.matches_pairs])
 
     def end_round(self):
         """
@@ -85,9 +79,8 @@ class Round(_BaseModel):
         Save the state of the round and the time it was completed in the database.
         """
         if not self.is_finished:
-            for match in self.matches:
-                if not match.is_finished:
-                    raise ValueError(f"Match with ID : {match.software_id} is not finished")
+            if any(not match.is_finished for match in self.matches):
+                raise ValueError(f"One or more matches are not finished.")
             self.time_end = str(datetime.now())
             self.is_finished = True
             self.save_to_database()
@@ -100,18 +93,4 @@ class Round(_BaseModel):
         :param player_id:
         :return: Match object
         """
-        for match in self.matches:
-            if player_id in match.score.keys():
-                return match
-        return None
-
-    def check_match_result(self):
-        """
-        Show the results of every match in the round.
-        """
-        for match in self.matches:
-            print(f"{match.software_id} : {match.score}")
-
-    def __repr__(self) -> str:
-        return (f"Round : {self.name}, Matches: {[match.software_id for match in self.matches]}, "
-                f"Started: {self.time_start}, Ended: {self.time_end}")
+        return next((match for match in self.matches if player_id in match.score.keys()), None)

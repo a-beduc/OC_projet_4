@@ -35,11 +35,8 @@ class _BaseModel(ABC):
         """
         data = cls.get_data()
         ids = [int(software_id.split("_")[1]) for software_id in data[cls.class_name_plural()].keys()]
-        if ids:
-            new_id = max(ids) + 1
-        else:
-            new_id = 1
         class_letter = cls.__name__[0].lower()
+        new_id = max(ids) + 1 if ids else 1
         return f"{class_letter}_{new_id}"
 
     @classmethod
