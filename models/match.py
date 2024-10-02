@@ -9,13 +9,16 @@ class Match(_BaseModel):
                  save_to_db=True):
         """
         Initialize a new match instance
-        before initialization, players are sorted with their id numbers to allows coherence in database.
+        before initialization, players are sorted with their id numbers to
+        allows coherence in database.
         :param player_1_software_id: string "p_<number>"
         :param player_2_software_id: string "p_<number>"
         :param save_to_db: if true, save the instance in the database
         """
         super().__init__()
-        self.players = sorted([player_1_software_id, player_2_software_id], key=lambda x: int(x.split('_')[1]))
+        # sort players ID based on the number and not the string["p_8", "p_11"]
+        self.players = sorted([player_1_software_id, player_2_software_id],
+                              key=lambda x: int(x.split('_')[1]))
         self.score: Dict[str, float] = {
             self.players[0]: 0.0,
             self.players[1]: 0.0
@@ -27,17 +30,22 @@ class Match(_BaseModel):
     @classmethod
     def class_name_plural(cls) -> str:
         """
-        This must supercharge the _Base_Model.class_name_plural because it would return "matchs"
+        This must supercharge the _Base_Model.class_name_plural because it
+        would return "matchs"
         """
         return "matches"
 
     @classmethod
-    def _create_instance_from_json(cls, item_data: Dict[str, object], match_id: str, save_to_db: bool = False):
+    def _create_instance_from_json(cls,
+                                   item_data: Dict[str, object],
+                                   match_id: str,
+                                   save_to_db: bool = False):
         """
         Create a match object from a json dictionary.
         :param item_data: The dictionary extracted from the tournament.json
         :param match_id:
-        :param save_to_db: must be false to avoid copy of match instance in database
+        :param save_to_db: must be false to avoid copy of match instance in
+        database
         :return: An instance of Match
         """
         is_finished = item_data['complete']
@@ -45,7 +53,8 @@ class Match(_BaseModel):
         match_data = list(item_data.items())
 
         player_scores = {player_id: score for player_id, score in match_data}
-        sorted_players = sorted(player_scores.keys(), key=lambda x: int(x.split('_')[1]))
+        sorted_players = sorted(player_scores.keys(),
+                                key=lambda x: int(x.split('_')[1]))
 
         instance = cls(player_1_software_id=sorted_players[0],
                        player_2_software_id=sorted_players[1],
@@ -66,55 +75,45 @@ class Match(_BaseModel):
         data["complete"] = self.is_finished
         return data
 
-    def id_win(self, player_software_id: str):
+    def _update_match(self, update_is_finished: bool = True):
+        self.is_finished = update_is_finished
+        self.save_to_database()
+
+    def id_win(self,
+               player_software_id: str):
         """
-        Save a player victory based on his/her software_id and block any further modifications of the result
+        Save a player victory based on his/her software_id and block any
+        further modifications of the result
         :param player_software_id:
-        :return: If the match result has already been decided, return a message without stopping the application.
+        :return: If the match result has already been decided, return a
+        message without stopping the application.
         """
         if not self.is_finished:
             if player_software_id in self.score:
                 self.score[player_software_id] = 1.0
-                self.is_finished = True
-                self.save_to_database()
+                self._update_match()
             else:
-                raise ValueError(f"Software_id : {player_software_id} is not valid.")
-        else:
-            print(f"Match ID : {self.software_id} ; Match result has already been decided.")
+                raise ValueError
 
     def draw(self):
         """
-        Save a draw between players based on his/her software_id and block any further modifications of the result
-        :return: If the match result has already been decided, return a message without stopping the application.
+        Save a draw between players based on his/her software_id and block any
+        further modifications of the result
+        :return: If the match result has already been decided, return a
+        message without stopping the application.
         """
         if not self.is_finished:
-            for player_software_id in self.score:
-                self.score[player_software_id] = 0.5
-            self.is_finished = True
-            self.save_to_database()
-        else:
-            print(f"Match ID : {self.software_id} ; Match result has already been decided.")
+            self.score = {player_software_id: 0.5 for player_software_id
+                          in self.players}
+            self._update_match()
 
     def reset_match_result(self):
         """
-        Method that will reinitialize the result of a match, if an error has been made
+        Method that will reinitialize the result of a match, if an error has
+        been made
         :return:
         """
         if self.is_finished:
-            for player_software_id in self.score:
-                self.score[player_software_id] = 0
-            self.is_finished = False
-            self.save_to_database()
-        else:
-            raise ValueError("Match result has not been decided yet.")
-
-    def __repr__(self) -> str:
-        player_info = []
-        for player_software_id, score in self.score.items():
-            player_info.append(f"Player {player_software_id}: {score}")
-
-        if self.is_finished:
-            return f"ID Match : {self.software_id} is finished ; Result: {', '.join(player_info)}"
-        else:
-            return (f"ID Match : {self.software_id} is not finished ; "
-                    f"Result pending: {list(self.score.keys())[0]} vs {list(self.score.keys())[1]}.")
+            self.score = {player_software_id: 0.0 for player_software_id
+                          in self.players}
+            self._update_match(update_is_finished=False)
