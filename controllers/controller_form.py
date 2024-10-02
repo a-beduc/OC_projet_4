@@ -11,9 +11,10 @@ class ControllerForm:
 
     def start(self):
         """
-        Starts the form interaction loop, handling user input and validation.
-        Returns the created element (e.g., 'NEW_PLAYER', 'NEW_TOURNAMENT') upon successful creation, or None if the
-        user goes back.
+        Starts the form interaction loop, handling user input and
+        validation. Returns the created element (e.g., 'NEW_PLAYER',
+        'NEW_TOURNAMENT') upon successful creation, or None if the user goes
+        back.
         """
         self.form_view.initialize()
         error_msg = ""
@@ -39,7 +40,10 @@ class ControllerForm:
 
     @staticmethod
     def reformat_date(date_string):
-        """ Reformat a data string, it should work as long as the user input YYYY MM DD in the correct order """
+        """
+        Reformat a data string, it should work as long as the user input
+        YYYY MM DD in the correct order
+        """
         date_list = re.findall(r'\d+', date_string)
         for idx, number in enumerate(date_list):
             if len(number) < 2:
@@ -87,7 +91,10 @@ class ControllerForm:
 
     @staticmethod
     def handle_answer(answer):
-        """ Display the content of an error message to the user depending on the answer. """
+        """
+        Display the content of an error message to the user depending on
+        the answer.
+        """
         if answer:
             if 'INCOMPLETE' in answer:
                 return 'Form is incomplete'

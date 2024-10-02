@@ -4,8 +4,9 @@ from curses.textpad import Textbox
 
 class ViewForm:
     """
-    Class responsible for displaying and interacting with a form in the terminal using the curses module.
-    The form uses the default size of a terminal on a Mac (24 lines and 80 columns).
+    Class responsible for displaying and interacting with a form in the
+    terminal using the curses module. The form uses the default size of a
+    terminal on a Mac (24 lines and 80 columns).
     """
 
     OUTER_HEIGHT = 24
@@ -80,12 +81,14 @@ class ViewForm:
         self.new_textboxes = True
         self.textboxes = []
 
-        # create the outer line and is used as a base for other windows placement
-        self.outer_wind = self.create_window(height=self.OUTER_HEIGHT,
-                                             width=self.OUTER_WIDTH,
-                                             start_y=(self.terminal_h - self.OUTER_HEIGHT) // 2,
-                                             start_x=(self.terminal_w - self.OUTER_WIDTH) // 2,
-                                             title=self.title, has_border=True, outer=True)
+        # create the outer line and is used as a base for other windows
+        # placement
+        self.outer_wind = self.create_window(
+            height=self.OUTER_HEIGHT,
+            width=self.OUTER_WIDTH,
+            start_y=(self.terminal_h - self.OUTER_HEIGHT) // 2,
+            start_x=(self.terminal_w - self.OUTER_WIDTH) // 2,
+            title=self.title, has_border=True, outer=True)
 
         self.command_wind = self.create_window(height=len(ViewForm.COMMANDS),
                                                width=self.OUTER_WIDTH - 2,
@@ -100,19 +103,22 @@ class ViewForm:
                                             start_x=1)
         self.update_menu_wind()
 
-        self.validation_wind = self.create_window(height=1,
-                                                  width=len(" >>> CONFIRM <<< ") + 3,
-                                                  start_y=len(ViewForm.COMMANDS) + 2 * len(self.question) + 5,
-                                                  start_x=(self.OUTER_WIDTH - len(" >>> CONFIRM <<< ")) // 2)
+        self.validation_wind = self.create_window(
+            height=1,
+            width=len(" >>> CONFIRM <<< ") + 3,
+            start_y=len(ViewForm.COMMANDS) + 2 * len(self.question) + 5,
+            start_x=(self.OUTER_WIDTH - len(" >>> CONFIRM <<< ")) // 2)
         self.update_validation_wind()
 
-        self.error_wind = self.create_window(height=3,
-                                             width=40,
-                                             start_y=len(ViewForm.COMMANDS) + 2 * len(self.question) + 4,
-                                             start_x=(self.OUTER_WIDTH - 40) // 2)
+        self.error_wind = self.create_window(
+            height=3,
+            width=40,
+            start_y=len(ViewForm.COMMANDS) + 2 * len(self.question) + 4,
+            start_x=(self.OUTER_WIDTH - 40) // 2)
         self.print_menu()
 
-    def create_window(self, height, width, start_y, start_x, title="", has_border=False, outer=False):
+    def create_window(self, height, width, start_y, start_x, title="",
+                      has_border=False, outer=False):
         """
         Create a curses window with given dimensions and properties.
         :param height: Height of the window
@@ -120,7 +126,8 @@ class ViewForm:
         :param start_y: Y-coordinate of the window's starting position
         :param start_x: X-coordinate of the window's starting position
         :param title: Optional title to display at the top of the window
-        :param has_border: Boolean indicating if the window should have a border
+        :param has_border: Boolean indicating if the window should have a
+        border
         :param outer: Boolean indicating if this is the main (outer) window
         :return: <obj.Window>
         """
@@ -147,7 +154,8 @@ class ViewForm:
 
     def update_menu_wind(self):
         """
-        Update the menu window with the list of questions. One question every other line.
+        Update the menu window with the list of questions. One question every
+        other line.
         """
         for idx, question in enumerate(self.question):
             x_position = (self.OUTER_WIDTH - 2) // 2 - len(question) - 1
@@ -157,13 +165,15 @@ class ViewForm:
     def update_validation_wind(self, reverse=False):
         """
         Update the validation button window.
-        :param reverse: Boolean indicating if the text should be displayed in reverse video (highlighted)
+        :param reverse: Boolean indicating if the text should be displayed in
+        reverse video (highlighted)
         """
         self.validation_wind.clear()
         validation_text = " >>> CONFIRM <<< "
         self.validation_wind.addstr(0, 0, validation_text)
         if reverse:
-            self.validation_wind.addstr(0, 0, validation_text, curses.A_REVERSE)
+            self.validation_wind.addstr(0, 0, validation_text,
+                                        curses.A_REVERSE)
         self.validation_wind.refresh()
 
     def create_textbox(self, index_y):
@@ -171,15 +181,18 @@ class ViewForm:
         Create a textbox (input field) for a specific question.
         :param index_y: Y-coordinate index for placing the textbox
         """
-        new_wind = self.create_window(1, (self.outer_wind.getmaxyx()[1] - 2) // 2,
-                                      index_y + 3 + self.command_wind.getmaxyx()[0],
-                                      self.outer_wind.getmaxyx()[1] // 2)
+        new_wind = self.create_window(
+            1,
+            (self.outer_wind.getmaxyx()[1] - 2) // 2,
+            index_y + 3 + self.command_wind.getmaxyx()[0],
+            self.outer_wind.getmaxyx()[1] // 2)
         box = Textbox(new_wind)
         self.textboxes.append(box)
 
     def print_menu(self):
         """
-        Display the menu with the list of questions and highlight the selected one.
+        Display the menu with the list of questions and highlight the selected
+        one.
         """
         self.menu_wind.clear()
         for idx, question in enumerate(self.question):
@@ -190,8 +203,11 @@ class ViewForm:
                 self.create_textbox(index_y)
         self.new_textboxes = False
         if self.selected_index is not None:
-            x_position = self.menu_wind.getmaxyx()[1] - len(self.question[self.selected_index // 2]) - 1
-            self.menu_wind.addstr(2 * (self.selected_index // 2), x_position, self.question[self.selected_index // 2],
+            x_position = (self.menu_wind.getmaxyx()[1] -
+                          len(self.question[self.selected_index // 2]) - 1)
+            self.menu_wind.addstr(2 * (self.selected_index // 2),
+                                  x_position,
+                                  self.question[self.selected_index // 2],
                                   curses.A_REVERSE)
         self.menu_wind.refresh()
 
@@ -201,8 +217,14 @@ class ViewForm:
         :param error_msg: The error message to display
         """
         self.error_wind.clear()
-        self.error_wind.addstr(1, (self.error_wind.getmaxyx()[1] - len(error_msg)) // 2, error_msg)
-        self.error_wind.addstr(2, (self.error_wind.getmaxyx()[1] - len('[press any key]')) // 2, '[press any key]')
+        self.error_wind.addstr(
+            1,
+            (self.error_wind.getmaxyx()[1] - len(error_msg)) // 2,
+            error_msg)
+        self.error_wind.addstr(
+            2,
+            (self.error_wind.getmaxyx()[1] - len('[press any key]')) // 2,
+            '[press any key]')
         self.error_wind.refresh()
         self.outer_wind.getch()
         self.error_wind.clear()
@@ -217,13 +239,15 @@ class ViewForm:
         """
         Move the selection down to the next question. Using % to circle.
         """
-        self.selected_index = (self.selected_index + 2) % (len(self.question) * 2)
+        self.selected_index = (
+                (self.selected_index + 2) % (len(self.question) * 2))
 
     def move_up(self):
         """
         Move the selection up to the previous question. Using % to circle.
         """
-        self.selected_index = (self.selected_index - 2) % (len(self.question) * 2)
+        self.selected_index = (
+                (self.selected_index - 2) % (len(self.question) * 2))
 
     def modify_textbox(self):
         """
@@ -257,7 +281,8 @@ class ViewForm:
     def validation_button(self):
         """
         Handle the interaction when the validation button is pressed.
-        :return: Tuple containing the action, element type, and form content to the controller
+        :return: Tuple containing the action, element type, and form content
+        to the controller
         """
         self.print_menu()
         self.update_validation_wind(reverse=True)
@@ -265,7 +290,8 @@ class ViewForm:
             key = self.outer_wind.getch()
 
             if key == curses.KEY_ENTER or key in [10, 13]:
-                form_content = [item.gather().strip() for item in self.textboxes]
+                form_content = [item.gather().strip() for item
+                                in self.textboxes]
                 return 'VALIDATE', self.element, form_content
             elif key in [ord('B'), ord('b'), ord('Q'), ord('q')]:
                 self.update_validation_wind()

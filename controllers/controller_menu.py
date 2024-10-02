@@ -7,8 +7,9 @@ from controllers.controller_tournament import ControllerTournament
 
 class ControllerMenu:
     """
-    Initializes the ControllerMenu with the provided terminal screen (stdscr).
-    Sets up the main menu, player table, tournament table, and form controllers.
+    Initializes the ControllerMenu with the provided terminal screen (
+    stdscr). Sets up the main menu, player table, tournament table, and form
+    controllers.
     """
     def __init__(self, stdscr):
         self.stdscr = stdscr
@@ -21,10 +22,10 @@ class ControllerMenu:
 
     def start(self):
         """
-        Main loop for the menu controller.
-        Continuously displays the main menu and handles the selected action until 'EXIT' is chosen.
-        Actions include creating a new tournament, viewing tournaments, creating a new player, viewing players, or
-        loading a specific tournament.
+        Main loop for the menu controller. Continuously displays the main
+        menu and handles the selected action until 'EXIT' is chosen. Actions
+        include creating a new tournament, viewing tournaments, creating a
+        new player, viewing players, or loading a specific tournament.
         """
         memory = None
         while True:
@@ -49,9 +50,10 @@ class ControllerMenu:
 
     def get_next_action(self, memory):
         """
-        Retrieves the next action to be performed by the menu controller.
-        If no action is stored in memory, it initializes the main menu and waits for the user to make a selection.
-        Otherwise, it returns the action stored in memory.
+        Retrieves the next action to be performed by the menu controller. If
+        no action is stored in memory, it initializes the main menu and
+        waits for the user to make a selection. Otherwise, it returns the
+        action stored in memory.
         """
         if memory is None:
             self.main_menu.initialize()
@@ -74,8 +76,9 @@ class ControllerMenu:
 
     def handle_load_tournament(self, tournament_id):
         """
-        Handles loading and managing an existing tournament based on the provided tournament ID.
-        Initializes a new tournament controller and starts it.
+        Handles loading and managing an existing tournament based on the
+        provided tournament ID. Initializes a new tournament controller and
+        starts it.
         """
         self.tournament = ControllerTournament(self.stdscr, tournament_id)
         self.tournament.start()

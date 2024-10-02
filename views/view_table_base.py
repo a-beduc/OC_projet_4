@@ -4,7 +4,8 @@ from abc import ABC, abstractmethod
 
 class ViewTableBase(ABC):
     """
-    Abstract class that implement most of the methods used in view_table_players and view_table_tournament,
+    Abstract class that implement most of the methods used in
+    view_table_players and view_table_tournament,
     for displaying and managing tables in the terminal using curses.
 
     Constants to be defined in child classes:
@@ -22,7 +23,10 @@ class ViewTableBase(ABC):
     SORTS_FIELDS = []
 
     def __init__(self, stdscr, pad_height):
-        """ Initializes the table view with the given terminal screen and pad height (lines of datas). """
+        """
+        Initializes the table view with the given terminal screen and pad
+        height (lines of datas).
+        """
         self.stdscr = stdscr
         self.pad_height = pad_height
         curses.curs_set(0)
@@ -30,7 +34,9 @@ class ViewTableBase(ABC):
         self.outer_height = self.stdscr.getmaxyx()[0]
         self.outer_width = self.stdscr.getmaxyx()[1] - 2
         self.inner_width = self.outer_width - 2
-        self.content_height = self.outer_height - (self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT + 1)
+        self.content_height = (
+                self.outer_height - (self.COMMAND_HEIGHT + self.HEADER_HEIGHT
+                                     + self.SEPARATOR_HEIGHT + 1))
 
         # Attributes storing the window and pad objects of the view
         self.outer_wind = None
@@ -76,7 +82,10 @@ class ViewTableBase(ABC):
         self.content_headers = self.create_content()
 
     def create_outer_window(self, title):
-        """ Creates and returns the outer window for the table with a border and a title. """
+        """
+        Creates and returns the outer window for the table with a border and a
+        title.
+        """
         outer_wind = curses.newwin(self.outer_height,
                                    self.outer_width,
                                    0,
@@ -89,15 +98,22 @@ class ViewTableBase(ABC):
         return outer_wind
 
     def create_command_window(self):
-        """ Create, update and returns the command window at the top of the screen. """
-        command_wind = self.outer_wind.derwin(self.COMMAND_HEIGHT, self.inner_width, 0, 1)
+        """
+        Create, update and returns the command window at the top of the
+        screen.
+        """
+        command_wind = self.outer_wind.derwin(self.COMMAND_HEIGHT,
+                                              self.inner_width, 0, 1)
         for idx, line in enumerate(self.COMMAND):
-            command_wind.addstr(idx + 2, (self.inner_width - len(line)) // 2, line)
+            command_wind.addstr(idx + 2,
+                                (self.inner_width - len(line)) // 2, line)
         command_wind.refresh()
         return command_wind
 
     def create_header_wind(self):
-        """ Create, update and returns the headers of the column of the table. """
+        """
+        Create, update and returns the headers of the column of the table.
+        """
         header_wind = self.outer_wind.derwin(self.HEADER_HEIGHT,
                                              self.inner_width,
                                              self.COMMAND_HEIGHT,
@@ -107,11 +123,15 @@ class ViewTableBase(ABC):
         return header_wind
 
     def create_separator_wind(self):
-        """ Create and return a line of separation between headers and the pad that contains the content. """
-        separator_wind = self.outer_wind.derwin(self.HEADER_HEIGHT,
-                                                self.inner_width,
-                                                self.HEADER_HEIGHT + self.COMMAND_HEIGHT,
-                                                1)
+        """
+        Create and return a line of separation between headers and the pad
+        that contains the content.
+        """
+        separator_wind = self.outer_wind.derwin(
+            self.HEADER_HEIGHT,
+            self.inner_width,
+            self.HEADER_HEIGHT + self.COMMAND_HEIGHT,
+            1)
         content_separator = self.update_separator_line(self.create_content())
         separator_wind.addstr(0, 1, content_separator)
         separator_wind.refresh()
@@ -129,12 +149,16 @@ class ViewTableBase(ABC):
         return line
 
     def create_content_pad(self):
-        """ Create and returns a pad that will hold the table's content rows. """
+        """
+        Create and returns a pad that will hold the table's content rows.
+        """
         content_pad = curses.newpad(self.pad_height, self.inner_width)
         content_pad.refresh(0, 0,
-                            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT, 2,
-                            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT + self.content_height
-                            - 1,
+                            self.COMMAND_HEIGHT + self.HEADER_HEIGHT
+                            + self.SEPARATOR_HEIGHT,
+                            2,
+                            self.COMMAND_HEIGHT + self.HEADER_HEIGHT
+                            + self.SEPARATOR_HEIGHT + self.content_height - 1,
                             self.inner_width - 1)
         return content_pad
 
@@ -157,7 +181,8 @@ class ViewTableBase(ABC):
     @staticmethod
     def reformat_date(date_number):
         str_date_number = str(date_number)
-        return '-'.join([str_date_number[0:4], str_date_number[4:6], str_date_number[6:8]])
+        return '-'.join([str_date_number[0:4], str_date_number[4:6],
+                         str_date_number[6:8]])
 
     @staticmethod
     @abstractmethod
@@ -165,13 +190,18 @@ class ViewTableBase(ABC):
         raise NotImplementedError
 
     def sort_move_right(self):
-        self.current_sort_index = (self.current_sort_index + 1) % len(self.indexes)
+        self.current_sort_index = (
+                (self.current_sort_index + 1) % len(self.indexes))
 
     def sort_move_left(self):
-        self.current_sort_index = (self.current_sort_index - 1) % len(self.indexes)
+        self.current_sort_index = (
+                (self.current_sort_index - 1) % len(self.indexes))
 
     def sort_select_option(self):
-        """ Selects the currently highlighted sort option and returns associated sort field """
+        """
+        Selects the currently highlighted sort option and returns associated
+        sort field
+        """
         self.header_wind.clear()
         self.header_wind.addstr(0, 1, self.content_headers)
         self.header_wind.refresh()
@@ -193,7 +223,8 @@ class ViewTableBase(ABC):
         self.line_headers = line_headers
         indexes_values = self.get_header_index(line_headers)
         strings_menu = line_headers.split(" │ ")
-        self.indexes = {i: (indexes_values[i], strings_menu[i]) for i in range(len(indexes_values))}
+        self.indexes = {i: (indexes_values[i], strings_menu[i]) for i
+                        in range(len(indexes_values))}
 
     def highlight_sort_line(self):
         self.header_wind.addstr(0, 1, self.line_headers)
@@ -206,7 +237,10 @@ class ViewTableBase(ABC):
         self.header_wind.refresh()
 
     def create_sort_menu(self, line_headers):
-        """ Creates and displays the sort menu, allowing the user to select a field to sort by. """
+        """
+        Creates and displays the sort menu, allowing the user to select a
+        field to sort by.
+        """
         self.initialize_sort_menu(line_headers)
 
         while True:
@@ -239,18 +273,23 @@ class ViewTableBase(ABC):
             return action
 
     def update_pad(self):
-        """ Updates and refreshes the content pad to display the current lines based on the current scroll position. """
-        self.content_pad.refresh(self.pad_line, 0,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
-                                 2,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
-                                 self.content_height - 1,
-                                 self.inner_width - 1)
+        """
+        Updates and refreshes the content pad to display the current lines
+        based on the current scroll position.
+        """
+        self.content_pad.refresh(
+            self.pad_line,
+            0,
+            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
+            2,
+            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT
+            + self.content_height - 1,
+            self.inner_width - 1)
 
     def start_view(self):
         """
-        Starts the main loop for displaying and interacting with the table view.
-        Handles user input for scrolling and sorting.
+        Starts the main loop for displaying and interacting with the table
+        view. Handles user input for scrolling and sorting.
         """
         while True:
             self.update_pad()
@@ -267,8 +306,11 @@ class ViewTableBase(ABC):
         for i, data in enumerate(sorted_content):
             line = self.create_content(data)
             self.content_pad.addstr(i, 1, line)
-        self.content_pad.refresh(0, 0,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT, 2,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
-                                 self.content_height - 1,
-                                 self.inner_width - 1)
+        self.content_pad.refresh(
+            0,
+            0,
+            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
+            2,
+            self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
+            self.content_height - 1,
+            self.inner_width - 1)

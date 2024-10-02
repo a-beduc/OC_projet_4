@@ -34,7 +34,8 @@ class Player(_BaseModel):
         Create a player object from a json dictionary.
         :param item_data: The dictionary extracted from the tournament.json
         :param player_id:
-        :param save_to_db: must be false to avoid copy of player instance in database
+        :param save_to_db: must be false to avoid copy of player instance in
+        database
         :return: An instance of Player
         """
         instance = cls(

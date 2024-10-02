@@ -3,23 +3,37 @@ import curses
 
 class ViewMenu:
     """
-    Class responsible for displaying and interacting with a menu in the terminal using the curses module.
-    The menu uses the default size of a terminal on a Mac (24 lines and 80 columns).
+    Class responsible for displaying and interacting with a menu in the
+    terminal using the curses module.
+    The menu uses the default size of a terminal on a Mac (24 lines and 80
+    columns).
     """
 
     ASCII_ART = [
-        "                                                                        ()    ",
-        "                                                                        /\\    ",
-        "  (\\=,                                                                 //\\\\   ",
-        " //  .\\                                                               (    ) ",
-        "(( \\_  \\      ___  _  _  ____  ____  ____     __   ____  ____          )__(  ",
-        " ))  `\\_)    / __)/ )( \\(  __)/ ___)/ ___)   / _\\ (  _ \\(  _ \\        /____\\ ",
-        " (/     \\    ( (__ ) __ ( ) _) \\___ \\\\___ \\  /    \\ ) __/ ) __/         |  |   ",
-        " | _.-'|     \\___)\\_)(_/(____)(____/(____/  \\_/\\_/(__)  (__)           |  |  ",
-        ")___(   ____  __   _  _  ____  __ _   __   _  _  ____  __ _  ____   /____\\",
-        "(=====) (_  _)/  \\ / )( \\(  _ \\(  ( \\ / _\\ ( \\/ )(  __)(  ( \\(_  _) (======)",
-        "}====={   )( (  O )) \\/ ( )   //    //    \\/ \\/ \\ ) _) /    /  )(   }======{",
-        "(_______) (__) \\__/ \\____/(__\\_)\\_)__)\\_/\\_/\\_)(_/(____)\\_)__) (__) (________)"
+        "                                                                     "
+        "   ()    ",
+        "                                                                     "
+        "   /\\    ",
+        "  (\\=,                                                              "
+        "   //\\\\   ",
+        " //  .\\                                                             "
+        "  (    ) ",
+        "(( \\_  \\      ___  _  _  ____  ____  ____     __   ____  ____      "
+        "    )__(  ",
+        " ))  `\\_)    / __)/ )( \\(  __)/ ___)/ ___)   / _\\ (  _ \\(  _ \\  "
+        "      /____\\ ",
+        " (/     \\    ( (__ ) __ ( ) _) \\___ \\\\___ \\  /    \\ ) __/ ) __/"
+        "         |  |   ",
+        " | _.-'|     \\___)\\_)(_/(____)(____/(____/  \\_/\\_/(__)  (__)     "
+        "      |  |  ",
+        ")___(   ____  __   _  _  ____  __ _   __   _  _  ____  __ _  ____   /"
+        "____\\",
+        "(=====) (_  _)/  \\ / )( \\(  _ \\(  ( \\ / _\\ ( \\/ )(  __)(  ( \\("
+        "_  _) (======)",
+        "}====={   )( (  O )) \\/ ( )   //    //    \\/ \\/ \\ ) _) /    /  )("
+        "   }======{",
+        "(_______) (__) \\__/ \\____/(__\\_)\\_)__)\\_/\\_/\\_)(_/(____)\\_)__"
+        ") (__) (________)"
     ]
 
     MIN_TERMINAL_HEIGHT = 24
@@ -91,10 +105,11 @@ class ViewMenu:
         :return: The created base window.
         """
         self.stdscr.clear()
-        base_wind = curses.newwin(self.MIN_TERMINAL_HEIGHT,
-                                  self.MIN_TERMINAL_WIDTH,
-                                  (self.terminal_h - self.MIN_TERMINAL_HEIGHT) // 2,
-                                  (self.terminal_w - self.MIN_TERMINAL_WIDTH) // 2)
+        base_wind = curses.newwin(
+            self.MIN_TERMINAL_HEIGHT,
+            self.MIN_TERMINAL_WIDTH,
+            (self.terminal_h - self.MIN_TERMINAL_HEIGHT) // 2,
+            (self.terminal_w - self.MIN_TERMINAL_WIDTH) // 2)
         base_wind.refresh()
         return base_wind
 
@@ -125,18 +140,22 @@ class ViewMenu:
         :return: The created menu window.
         """
         h, w = (len(self.MAIN_MENU) + 2, self.base_wind.getmaxyx()[1])
-        menu_wind = self.base_wind.derwin(h, w, self.ascii_wind.getmaxyx()[0] + 1, 0)
+        menu_wind = self.base_wind.derwin(h, w,
+                                          self.ascii_wind.getmaxyx()[0] + 1, 0)
         menu_wind.keypad(True)
         menu_wind.refresh()
         return menu_wind
 
     def print_menu(self):
         """
-        Display the menu options in the menu window, with the selected option highlighted.
+        Display the menu options in the menu window, with the selected option
+        highlighted.
         """
         self.menu_wind.clear()
-        # ' Tournaments ': (0, 'TOURNAMENT_MENU') --> (' Tournaments ': (0, 'TOURNAMENT_MENU')) where 0 = sort_key
-        menu_items = sorted(self.current_menu.items(), key=lambda item: item[1][0])
+        # ' Tournaments ': (0, 'TOURNAMENT_MENU') -->
+        # (' Tournaments ': (0, 'TOURNAMENT_MENU')) where 0 = sort_key
+        menu_items = sorted(self.current_menu.items(),
+                            key=lambda item: item[1][0])
         menu_width = self.menu_wind.getmaxyx()[1]
 
         for line, (idx, _) in menu_items:
@@ -148,18 +167,23 @@ class ViewMenu:
         self.menu_wind.refresh()
 
     def move_up(self):
-        self.current_line_index = (self.current_line_index - 1) % len(self.current_menu)
+        self.current_line_index = (
+                (self.current_line_index - 1) % len(self.current_menu))
 
     def move_down(self):
-        self.current_line_index = (self.current_line_index + 1) % len(self.current_menu)
+        self.current_line_index = (
+                (self.current_line_index + 1) % len(self.current_menu))
 
     def select_option(self):
         """
-        Select the currently highlighted menu item and return the corresponding action.
+        Select the currently highlighted menu item and return the
+        corresponding action.
         :return: The action associated with the selected menu item.
         """
-        # ' Tournaments ': (0, 'TOURNAMENT_MENU') --> (' Tournaments ': (0, 'TOURNAMENT_MENU')) where 0 = sort_key
-        menu_items = sorted(self.current_menu.items(), key=lambda item: item[1][0])
+        # ' Tournaments ': (0, 'TOURNAMENT_MENU') -->
+        # (' Tournaments ': (0, 'TOURNAMENT_MENU')) where 0 = sort_key
+        menu_items = sorted(self.current_menu.items(),
+                            key=lambda item: item[1][0])
         selected_item = menu_items[self.current_line_index][1][1]
         if selected_item in self.menus.keys():
             self.current_menu = self.menus[selected_item]

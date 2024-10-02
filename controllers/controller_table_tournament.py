@@ -4,8 +4,10 @@ from models.tournament import Tournament
 
 class ControllerTableTournament:
     """
-    Controller class responsible for managing and displaying the table of tournaments.
-    It interacts with tournament data from the database and uses ViewTableTournaments to display and sort the data.
+    Controller class responsible for managing and displaying the table of
+    tournaments.
+    It interacts with tournament data from the database and uses
+    ViewTableTournaments to display and sort the data.
     """
     def __init__(self, stdscr):
         self.stdscr = stdscr
@@ -16,7 +18,10 @@ class ControllerTableTournament:
         self.tournament_table_view = None
 
     def start(self):
-        """ Starts the tournament table view and handles user input for sorting, loading, and creating tournaments. """
+        """
+        Starts the tournament table view and handles user input for
+        sorting, loading, and creating tournaments.
+        """
         self.update_from_database()
         self.tournament_table_view.initialize('List of Tournament')
         while True:
@@ -38,18 +43,23 @@ class ControllerTableTournament:
                     continue
 
     def update_from_database(self):
-        """ Fetches tournament data from the database, cleans it, and initializes the tournament table view. """
+        """
+        Fetches tournament data from the database, cleans it, and
+        initializes the tournament table view.
+        """
         self.raw_data = Tournament.get_data()['tournaments']
         self.data = {}
         self.clean_data()
         self.pad_height = len(self.data)
         self.sorted_content = []
         self.sort_data(['id'])
-        self.tournament_table_view = ViewTableTournaments(self.stdscr, self.pad_height)
+        self.tournament_table_view = ViewTableTournaments(self.stdscr,
+                                                          self.pad_height)
 
     def clean_data(self):
         """
-        Cleans the raw tournament data by removing unnecessary fields and calculating participant and round counts.
+        Cleans the raw tournament data by removing unnecessary fields and
+        calculating participant and round counts.
         """
         data_to_clean = self.raw_data.copy()
         for key, value in data_to_clean.items():
@@ -62,10 +72,14 @@ class ControllerTableTournament:
     @staticmethod
     def sort_key(list_of_dict, sort_fields):
         """ Sorts a list of dictionaries based on the specified fields. """
-        return sorted(list_of_dict, key=lambda x: tuple([x[field] for field in sort_fields]))
+        return sorted(list_of_dict, key=lambda x: tuple([x[field] for field
+                                                         in sort_fields]))
 
     def sort_data(self, sort_fields):
-        """ Sorts the tournament data based on the specified fields and updates the sorted_content attribute. """
+        """
+        Sorts the tournament data based on the specified fields and updates
+        the sorted_content attribute.
+        """
         data_list = []
         for key, value in self.data.items():
             id_num = int(key.split("_")[1])
@@ -86,7 +100,9 @@ class ControllerTableTournament:
         self.sorted_content = self.sort_key(data_list, sort_fields)
 
     def check_tournament(self, number):
-        """ Verifies if a tournament with the given number exists in the database. """
+        """
+        Verifies if a tournament with the given number exists in the database.
+        """
         tournament_key = f"t_{number}"
         if tournament_key in self.raw_data.keys():
             return tournament_key
