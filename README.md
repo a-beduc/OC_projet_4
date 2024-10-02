@@ -69,16 +69,6 @@ Ensure you have the following installed on your system:
     python main.py
     ```
 
-<img alt="Image of the menu of the application" height="489" src="images%2F1-MENU.png" title="MENU" width="800"/>
- - On macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-* Execute the script:
-    ```bash
-    python main.py
-    ```
-
 <p align="center">
     <img alt="Image of the menu of the application" height="489" src="images%2F1-MENU.png" title="MENU" width="800"/>
 </p>
