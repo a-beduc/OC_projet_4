@@ -5,7 +5,7 @@ from curses.textpad import Textbox
 class ViewForm:
     """
     Class responsible for displaying and interacting with a form in the terminal using the curses module.
-    The form uses the default size of a terminal on a Mac (24 lines and 78 columns).
+    The form uses the default size of a terminal on a Mac (24 lines and 80 columns).
     """
 
     OUTER_HEIGHT = 24
@@ -77,6 +77,8 @@ class ViewForm:
         """
         Initialize and create all the windows required for the form.
         """
+        self.new_textboxes = True
+        self.textboxes = []
 
         # create the outer line and is used as a base for other windows placement
         self.outer_wind = self.create_window(height=self.OUTER_HEIGHT,

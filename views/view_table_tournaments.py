@@ -4,7 +4,14 @@ from views.view_table_base import ViewTableBase
 
 
 class ViewTableTournaments(ViewTableBase):
-    COMMAND_HEIGHT = 6
+    """
+    A class for displaying and managing a table of tournaments using the curses library.
+    Inherits from ViewTableBase and implements specific behavior for tournament data.
+
+    Constants:
+        COMMAND (list): Instructions for navigating the table, creating new tournaments, and loading existing ones.
+        SORTS_FIELDS (list): Fields by which the tournament table can be sorted.
+    """
 
     COMMAND = [
         "[↓][↑] Move, [s] Sort menu, [q] Quit",
@@ -25,16 +32,19 @@ class ViewTableTournaments(ViewTableBase):
 
     def __init__(self, stdscr, pad_height):
         super().__init__(stdscr, pad_height)
-
-    def initialize(self):
-        self.outer_wind = self.create_outer_window(" List of Tournaments ")
-        self.command_wind = self.create_command_window()
-        self.header_wind = self.create_header_wind()
-        self.separator_wind = self.create_separator_wind()
-        self.content_pad = self.create_content_pad()
-        self.content_headers = self.create_content()
+        tournament_key_action = {
+            ord('N'): self.new_tournament,
+            ord('n'): self.new_tournament,
+            ord('L'): self.load_tournament,
+            ord('l'): self.load_tournament
+        }
+        self.TABLE_KEY_ACTION.update(tournament_key_action)
 
     def create_content(self, data=None):
+        """
+        Creates the table content for tournament as string lines, either displaying headers or data rows.
+        If data is None, create headers
+        """
         separator = " │ "
         software_id_header = "#ID  "
         name = "Name"
@@ -69,6 +79,7 @@ class ViewTableTournaments(ViewTableBase):
 
     @staticmethod
     def reformat_number(number):
+        """ Reformats a number to ensure it is at least two characters long."""
         string_number = str(number)
         if len(string_number) == 1:
             return f" {number}"
@@ -77,6 +88,7 @@ class ViewTableTournaments(ViewTableBase):
 
     @staticmethod
     def get_header_index(header_string):
+        """ Calculates the index positions of each column in the header string. """
         parts = header_string.split("│")
         idx_id = 0
         idx_name = 2 + len(parts[0])
@@ -88,59 +100,26 @@ class ViewTableTournaments(ViewTableBase):
         idx_complete = 1 + idx_rounds + len(parts[6])
         return idx_id, idx_name, idx_place, idx_date_start, idx_date_end, idx_participants, idx_rounds, idx_complete
 
-    def start_view(self, line_index=0):
-        running = True
-        pad_start_line = 0
-        while running:
-            self.content_pad.refresh(pad_start_line, 0,
-                                     self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT,
-                                     2,
-                                     self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
-                                     self.content_height - 1,
-                                     self.inner_width - 1)
-            key = self.outer_wind.getch()
-            if key in [81, 113]:  # 'Q' or 'q'
-                return 'BACK'
-            elif key in [83, 115]:  # 'S' or 's'
-                action = self.create_sort_menu(self.SORTS_FIELDS, self.content_headers, line_index)
-                if action is not None:
-                    return action
-            elif key == curses.KEY_DOWN:
-                if pad_start_line < self.pad_height - self.content_height:
-                    pad_start_line += 1
-            elif key == curses.KEY_UP:
-                if pad_start_line > 0:
-                    pad_start_line -= 1
-            elif key in [78, 110]:  # 'N' or 'n'
-                return "NEW_TOURNAMENT"
-            elif key in [76, 108]:  # 'L' or 'l'
-                action = self.create_load_tournament_wind()
-                curses.curs_set(0)
-                if action is not None:
-                    return 'LOAD_TOURNAMENT', action
+    @staticmethod
+    def new_tournament():
+        return "NEW_TOURNAMENT"
 
-    def fill_pad(self, sorted_content):
-        self.content_pad.clear()
-        for i, data in enumerate(sorted_content):
-            line = self.create_content(data)
-            self.content_pad.addstr(i, 1, line)
-        self.content_pad.refresh(0, 0,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT, 2,
-                                 self.COMMAND_HEIGHT + self.HEADER_HEIGHT + self.SEPARATOR_HEIGHT +
-                                 self.content_height - 1,
-                                 self.inner_width - 1)
+    def load_tournament(self):
+        action = self.create_load_tournament_wind()
+        curses.curs_set(0)
+        if action is not None:
+            return 'LOAD_TOURNAMENT', action
 
     def create_load_tournament_wind(self):
-        clearing_space_height = 7
-        clearing_space_width = 26
+        """ Creates a window to prompt the user to enter the ID of a tournament to load. """
+        clearing_space_height, clearing_space_width = (7, 26)
         clearing_wind = self.outer_wind.derwin(clearing_space_height, clearing_space_width,
                                                (self.outer_height - clearing_space_height) // 2,
                                                (self.outer_width - clearing_space_width) // 2)
         clearing_wind.clear()
         clearing_wind.refresh()
 
-        load_tournament_height = clearing_space_height - 2
-        load_tournament_width = clearing_space_width - 2
+        load_tournament_height, load_tournament_width = (clearing_space_height - 2, clearing_space_width - 2)
         load_tournament_wind = clearing_wind.derwin(load_tournament_height, load_tournament_width,
                                                     1,
                                                     1)
