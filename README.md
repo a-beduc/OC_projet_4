@@ -2,7 +2,9 @@
 
 Fourth project for the online course of Python application development on OpenClassroom.
 
-<img alt="Logo of the chess application" height="238" src="images/0-LOGO.png" title="Logo of the chess application" width="300"/>
+<p align="center">
+    <img alt="Logo of the chess application" height="238" src="images/0-LOGO.png" title="Logo of the chess application" width="300"/>
+</p>
 
 ## Description
 
@@ -47,9 +49,9 @@ Ensure you have the following installed on your system:
 ## How to Generate a Flake8 Report
 
 * To generate a Flake8 HTML report, run the following command:
-      ```bash
-      flake8 --format=html --htmldir=flake8 --exclude=venv
-      ```
+  ```bash
+  flake8 --format=html --htmldir=flake8 --exclude=venv
+  ```
 
 ## How to Run the Application
 * From the terminal, navigate to the project directory.
@@ -68,3 +70,15 @@ Ensure you have the following installed on your system:
     ```
 
 <img alt="Image of the menu of the application" height="489" src="images%2F1-MENU.png" title="MENU" width="800"/>
+ - On macOS/Linux:
+        ```bash
+        source venv/bin/activate
+        ```
+* Execute the script:
+    ```bash
+    python main.py
+    ```
+
+<p align="center">
+    <img alt="Image of the menu of the application" height="489" src="images%2F1-MENU.png" title="MENU" width="800"/>
+</p>
