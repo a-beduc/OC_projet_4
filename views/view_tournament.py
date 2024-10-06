@@ -23,6 +23,7 @@ class ViewTournament:
     COMMAND_TOURNAMENT = [
         '[↓][↑] Navigate',
         '[r] Select Round',
+        '[s] Start Next Round',
         '[p] Player Menu',
         '[q] Quit'
     ]
@@ -98,6 +99,7 @@ class ViewTournament:
             'begin_tournament': self.begin_tournament,
             'quit': self.quit,
             'select_round': self.select_round,
+            'start_new_round': self.start_new_round,
             'sort_name': self.sort_name,
             'sort_score': self.sort_score,
             'select_match': self.select_match,
@@ -439,7 +441,7 @@ class ViewTournament:
         round_string = self.reformat_name_round(id_round_status['round_name'],
                                                 target_length)
         id_string = str(id_round_status['id']).rjust(len('#000')) if (
-                id_round_status['id'] is not None) else 'null'
+                id_round_status['id'] is not None) else '   -'
         status_string = (
             str(id_round_status['round_status']).ljust(len('not started')))
         return separator.join([id_string, round_string, status_string])
@@ -486,7 +488,7 @@ class ViewTournament:
         controller.
         """
         action = self.create_form_wind('add_player')
-        if action is not None or '':
+        if action is not (None or ''):
             return 'ADD_PLAYER', action
 
     @staticmethod
@@ -496,6 +498,14 @@ class ViewTournament:
         controller.
         """
         return 'START_TOURNAMENT'
+
+    @staticmethod
+    def start_new_round():
+        """
+        Method following a user input, send request to start the new round
+        to controller.
+        """
+        return 'START_NEW_ROUND'
 
     @staticmethod
     def ranking_menu():
@@ -623,6 +633,8 @@ class ViewTournament:
             curses.KEY_UP: self.key_action['move_up'],
             ord('R'): self.key_action['select_round'],
             ord('r'): self.key_action['select_round'],
+            ord('S'): self.key_action['start_new_round'],
+            ord('s'): self.key_action['start_new_round'],
             ord('P'): self.key_action['ranking_menu'],
             ord('p'): self.key_action['ranking_menu'],
             ord('Q'): self.key_action['quit'],
@@ -683,7 +695,7 @@ class ViewTournament:
                 if result:
                     return result
 
-    def start_round_view(self, round_data, is_finished=False):
+    def start_round_view(self, round_data, is_finished=False, is_round_started=False):
         """
         View displaying a round of a tournament, wait for specific input to
         transmit to controller.
@@ -702,7 +714,7 @@ class ViewTournament:
         }
 
         self.pad_start_line = 0
-        if is_finished:
+        if is_finished or not is_round_started:
             self.update_command_wind('command_finished_round')
             to_delete = (ord('M'), ord('m'), ord('C'), ord('c'))
             for key in to_delete:
