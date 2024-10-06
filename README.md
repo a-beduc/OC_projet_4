@@ -50,7 +50,7 @@ Ensure you have the following installed on your system:
 
 * To generate a Flake8 HTML report, run the following command:
   ```bash
-  flake8 --format=html --htmldir=flake8 --exclude=venv
+  flake8 --format=html --htmldir=flake8-report
   ```
 
 ## How to Run the Application
