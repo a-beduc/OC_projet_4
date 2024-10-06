@@ -259,7 +259,7 @@ class Tournament(_BaseModel):
             new_round_number = int(list_of_round[-1].split("_")[-1]) + 1
             return f"Round_{new_round_number}"
 
-    def start_next_round(self):
+    def create_next_round(self):
         """
         Start the next round of the tournament by generating pairings based on
         the current ranking.
@@ -280,6 +280,18 @@ class Tournament(_BaseModel):
                 ranking)
             self.rounds[current_round] = Round(name=current_round,
                                                matches_pairs=next_pairing)
+            self.save_to_database()
+
+        except KeyError as ke:
+            raise ke
+
+    def start_new_round(self):
+        """ Methods to call when starting a round to save the time. """
+        try:
+            current_round = self.check_current_round()
+            if self.rounds[current_round].time_start is not None:
+                raise ValueError
+            self.rounds[current_round].start_round()
             self.save_to_database()
 
         except KeyError as ke:

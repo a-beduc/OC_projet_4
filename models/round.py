@@ -22,7 +22,7 @@ class Round(_BaseModel):
         """
         super().__init__()
         self.name = name
-        self.time_start = str(datetime.now())
+        self.time_start = None
         self.time_end = None
         self.is_finished = False
         self.matches = []
@@ -31,6 +31,11 @@ class Round(_BaseModel):
             self.create_matches()
         if save_to_db:
             self.save_to_database()
+
+    def start_round(self):
+        """ Method to save the time when round start. """
+        self.time_start = str(datetime.now())
+        self.save_to_database()
 
     @classmethod
     def _create_instance_from_json(cls,

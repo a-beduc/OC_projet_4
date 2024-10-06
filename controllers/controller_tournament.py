@@ -110,7 +110,7 @@ class ControllerTournament:
                 case ('SELECT_ROUND', _):
                     round_id = f"r_{action[1]}"
                     selected_round = self.check_round_id(round_id)
-                    if selected_round is None:
+                    if (selected_round or selected_round.time_start) is None:
                         continue
                     self.start_round(selected_round)
                     self.name_score = self.sort_key(
@@ -118,6 +118,13 @@ class ControllerTournament:
                         ['score', 'last_name', 'first_name'])
                     self.view_tournament.initialize_started(
                         self.name_score, self.reformat_round_status())
+                case 'START_NEW_ROUND':
+                    try:
+                        self.tournament.start_new_round()
+                        self.view_tournament.initialize_started(self.name_score,
+                                                                self.reformat_round_status())
+                    except ValueError:
+                        continue
                 case 'RANKING':
                     self.start_ranking()
                 case _:
@@ -128,9 +135,13 @@ class ControllerTournament:
         Loop of a specific round in a tournament, show every match of a round.
         """
         round_data = self.prepare_round(selected_round)
+        is_round_started = False if selected_round.time_start is None else True
         while True:
             action = self.view_tournament.start_round_view(
-                round_data, selected_round.is_finished)
+                round_data,
+                selected_round.is_finished,
+                is_round_started
+            )
             match action:
                 case 'EXIT':
                     return
@@ -145,7 +156,7 @@ class ControllerTournament:
                 case 'ROUND_COMPLETE':
                     try:
                         self.tournament.complete_round(selected_round.name)
-                        self.tournament.start_next_round()
+                        self.tournament.create_next_round()
                         break
                     except ValueError:
                         continue
@@ -276,14 +287,16 @@ class ControllerTournament:
         for key, value in self.tournament.rounds.items():
             round_name = ' '.join(key.split('_'))
             if value is None:
-                round_id = 'null'
+                round_id = '   -'
                 status = 'not started'
             else:
                 round_id = value.software_id.split('_')[1]
                 if value.is_finished is True:
                     status = 'complete'
-                else:
+                elif value.time_start is not None:
                     status = 'pending...'
+                else:
+                    status = 'ready'
             round_list.append({'id': round_id, 'round_name': round_name,
                                'round_status': status})
         return round_list
