@@ -35,7 +35,9 @@ Ensure you have the following installed on your system:
 * Activate the virtual environment:
     - On Windows:
         ```bash
-        venv\Scripts\activate
+        cd venv/Scripts
+        activate
+        cd ../..
         ```
     - On macOS/Linux:
         ```bash
@@ -58,7 +60,9 @@ Ensure you have the following installed on your system:
 * Activate the virtual environment:
     - On Windows:
         ```bash
-        cd venv/Scripts/activate
+        cd venv/Scripts
+        activate
+        cd ../..
         ```
     - On macOS/Linux:
         ```bash
