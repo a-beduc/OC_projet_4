@@ -1,4 +1,3 @@
-from models import tournament
 from models.tournament import Tournament
 from models.player import Player
 from views.view_tournament import ViewTournament
