@@ -1,3 +1,4 @@
+from models import tournament
 from models.tournament import Tournament
 from models.player import Player
 from views.view_tournament import ViewTournament
@@ -66,9 +67,10 @@ class ControllerTournament:
                     except (ValueError, KeyError, NameError):
                         continue
                 case 'START_TOURNAMENT':
-                    self.tournament.initialize_first_round()
-                    self.tournament_started = True
-                    return
+                    if len(self.tournament.participants) > len(self.tournament.rounds):
+                        self.tournament.initialize_first_round()
+                        self.tournament_started = True
+                        return
                 case 'RANKING':
                     self.start_ranking()
                 case _:
@@ -110,7 +112,7 @@ class ControllerTournament:
                 case ('SELECT_ROUND', _):
                     round_id = f"r_{action[1]}"
                     selected_round = self.check_round_id(round_id)
-                    if (selected_round or selected_round.time_start) is None:
+                    if selected_round is None or selected_round.time_start is None:
                         continue
                     self.start_round(selected_round)
                     self.name_score = self.sort_key(
